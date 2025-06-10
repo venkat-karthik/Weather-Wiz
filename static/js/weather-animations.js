@@ -196,34 +196,84 @@ class WeatherAnimations {
 
     // Snow animation
     createSnowAnimation() {
-        const snowflakes = 50;
+        const snowflakes = 80;
+        const snowSymbols = ['❄', '❅', '❆', '✻', '✼', '❈'];
         
         for (let i = 0; i < snowflakes; i++) {
             const flake = document.createElement('div');
             flake.className = 'snowflake';
-            flake.innerHTML = '❄';
+            flake.innerHTML = snowSymbols[Math.floor(Math.random() * snowSymbols.length)];
+            const size = 8 + Math.random() * 12;
+            const speed = 3 + Math.random() * 4;
+            const opacity = 0.4 + Math.random() * 0.6;
+            const sway = 30 + Math.random() * 60;
+            
             flake.style.cssText = `
                 position: absolute;
-                color: rgba(255,255,255,0.8);
-                font-size: ${8 + Math.random() * 8}px;
-                left: ${Math.random() * 100}%;
-                animation: snowFall ${3 + Math.random() * 3}s linear infinite;
-                animation-delay: ${Math.random() * 3}s;
+                color: rgba(255,255,255,${opacity});
+                font-size: ${size}px;
+                left: ${Math.random() * 110}%;
+                animation: snowFall ${speed}s linear infinite, snowSway ${2 + Math.random() * 2}s ease-in-out infinite alternate;
+                animation-delay: ${Math.random() * 5}s;
+                text-shadow: 0 0 ${size/2}px rgba(255,255,255,0.5);
+                filter: blur(${Math.random() * 0.5}px);
             `;
             
             this.animationContainer.appendChild(flake);
             this.animationElements.push(flake);
         }
 
+        // Add ground snow accumulation effect
+        const groundSnow = document.createElement('div');
+        groundSnow.className = 'ground-snow';
+        groundSnow.style.cssText = `
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(to top, rgba(255,255,255,0.3), transparent);
+            animation: snowAccumulate 10s ease-in-out infinite alternate;
+        `;
+        
+        this.animationContainer.appendChild(groundSnow);
+        this.animationElements.push(groundSnow);
+
         this.addCSS(`
             @keyframes snowFall {
                 0% {
-                    top: -20px;
+                    top: -30px;
+                    opacity: 0;
                     transform: translateX(0px) rotate(0deg);
+                }
+                10% {
+                    opacity: 1;
+                }
+                90% {
+                    opacity: 1;
                 }
                 100% {
                     top: 100vh;
+                    opacity: 0;
                     transform: translateX(${Math.random() * 100 - 50}px) rotate(360deg);
+                }
+            }
+            @keyframes snowSway {
+                0% {
+                    transform: translateX(-10px);
+                }
+                100% {
+                    transform: translateX(10px);
+                }
+            }
+            @keyframes snowAccumulate {
+                0% {
+                    height: 5px;
+                    opacity: 0.2;
+                }
+                100% {
+                    height: 25px;
+                    opacity: 0.4;
                 }
             }
         `);

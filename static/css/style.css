@@ -555,6 +555,163 @@ body {
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
+/* Floating Action Buttons */
+.fab-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.fab {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px var(--shadow);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 32px var(--shadow);
+}
+
+.fab:active {
+    transform: scale(0.95);
+}
+
+.fab-primary {
+    background: linear-gradient(135deg, rgba(0,123,255,0.8), rgba(0,86,179,0.8));
+    border-color: rgba(0,123,255,0.5);
+}
+
+.fab-secondary {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+}
+
+/* Enhanced button styles */
+.btn-refresh {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.btn-refresh:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+.btn-refresh.refreshing {
+    animation: spin 1s linear infinite;
+}
+
+/* Temperature unit toggle animation */
+.temp-unit {
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin-left: 2px;
+}
+
+.temp-unit:hover {
+    background: var(--glass-bg);
+    transform: scale(1.1);
+}
+
+/* Pulse animation for interactive elements */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255,255,255,0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255,255,255,0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255,255,255,0);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Enhance glass effect with better blur */
+.glass-effect {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* Weather icon hover effects */
+.weather-icon-large img {
+    transition: all 0.3s ease;
+}
+
+.weather-icon-large img:hover {
+    transform: scale(1.05) rotate(5deg);
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+}
+
+/* Card hover effects */
+.weather-detail-card,
+.weather-widget-card,
+.city-card,
+.daily-forecast-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.weather-detail-card:hover,
+.weather-widget-card:hover,
+.city-card:hover,
+.daily-forecast-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 16px 48px var(--shadow);
+}
+
+/* Animated gradient backgrounds */
+.weather-main-card {
+    background: linear-gradient(135deg, var(--glass-bg), rgba(255,255,255,0.05));
+    position: relative;
+    overflow: hidden;
+}
+
+.weather-main-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
     width: 8px;

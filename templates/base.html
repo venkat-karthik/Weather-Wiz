@@ -96,6 +96,19 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Floating Action Buttons -->
+    <div class="fab-container">
+        <button class="fab fab-secondary" data-refresh title="Refresh Weather">
+            <i data-feather="refresh-cw"></i>
+        </button>
+        <button class="fab fab-secondary" data-location title="Current Location">
+            <i data-feather="map-pin"></i>
+        </button>
+        <button class="fab fab-secondary" data-unit-toggle title="Toggle °C/°F">
+            <i data-feather="thermometer"></i>
+        </button>
+    </div>
+
     <!-- Footer -->
     <footer class="mt-5 py-4 text-center text-white-50">
         <div class="container">
