@@ -15,16 +15,16 @@
 
 /* Dark theme colors */
 .theme-dark {
-    --bg-gradient-start: #1a1a2e;
-    --bg-gradient-end: #16213e;
-    --card-bg: rgba(0, 0, 0, 0.3);
-    --card-border: rgba(255, 255, 255, 0.1);
+    --bg-gradient-start: #0f0f23;
+    --bg-gradient-end: #1a1a3a;
+    --card-bg: rgba(0, 0, 0, 0.4);
+    --card-border: rgba(255, 255, 255, 0.15);
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.9);
     --text-muted: rgba(255, 255, 255, 0.7);
-    --glass-bg: rgba(0, 0, 0, 0.2);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --shadow: rgba(0, 0, 0, 0.3);
+    --glass-bg: rgba(0, 0, 0, 0.3);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --shadow: rgba(0, 0, 0, 0.5);
 }
 
 /* Base styles */

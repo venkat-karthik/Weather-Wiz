@@ -10,14 +10,22 @@
         <div class="card weather-main-card glass-effect">
             <div class="card-body text-center">
                 <h1 class="location-name">{{ weather.location }}</h1>
-                <div class="current-temp">{{ weather.temperature }}°</div>
+                <div class="current-temp" data-temp-celsius="{{ weather.temperature }}" data-temp-fahrenheit="{{ ((weather.temperature * 9/5) + 32)|round }}">
+                    <span class="temp-value">{{ weather.temperature }}</span>°<span class="temp-unit" data-unit-toggle style="cursor: pointer;" title="Click to toggle °C/°F">C</span>
+                </div>
                 <div class="weather-condition">{{ weather.description }}</div>
                 <div class="weather-icon-large">
                     <img src="https://openweathermap.org/img/wn/{{ weather.icon }}@4x.png" 
                          alt="{{ weather.description }}" class="img-fluid">
                 </div>
                 <div class="last-updated text-muted">
-                    <i data-feather="refresh-cw"></i> Updated {{ weather.last_updated }}
+                    <button class="btn btn-link text-muted p-0" data-refresh title="Refresh weather data">
+                        <i data-feather="refresh-cw"></i>
+                    </button>
+                    Updated {{ weather.last_updated }}
+                    <button class="btn btn-link text-muted p-0 ms-2" data-location title="Use current location">
+                        <i data-feather="map-pin"></i>
+                    </button>
                 </div>
             </div>
         </div>

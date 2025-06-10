@@ -169,6 +169,40 @@ def api_weather(city):
         logging.error(f"API error for {city}: {str(e)}")
         return jsonify({'error': 'Weather service unavailable'}), 500
 
+@app.route('/api/weather-by-coords')
+def api_weather_by_coords():
+    """API endpoint for getting weather data by coordinates"""
+    try:
+        lat = request.args.get('lat', type=float)
+        lon = request.args.get('lon', type=float)
+        
+        if not lat or not lon:
+            return jsonify({'error': 'Latitude and longitude required'}), 400
+        
+        # Use reverse geocoding to get city name, then get weather
+        import requests
+        geocoding_url = f"https://api.openweathermap.org/geo/1.0/reverse"
+        params = {
+            'lat': lat,
+            'lon': lon,
+            'limit': 1,
+            'appid': weather_service.api_key
+        }
+        
+        response = requests.get(geocoding_url, params=params, timeout=10)
+        response.raise_for_status()
+        location_data = response.json()
+        
+        if location_data:
+            city_name = location_data[0]['name']
+            return redirect(url_for('index', city=city_name))
+        else:
+            return jsonify({'error': 'Location not found'}), 404
+            
+    except Exception as e:
+        logging.error(f"Coordinates API error: {str(e)}")
+        return jsonify({'error': 'Unable to get location weather'}), 500
+
 @app.template_filter('timestamp_to_time')
 def timestamp_to_time(timestamp):
     """Convert timestamp to readable time"""

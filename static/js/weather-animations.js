@@ -83,35 +83,77 @@ class WeatherAnimations {
 
     // Rain animation
     createRainAnimation() {
-        const rainDrops = 100;
+        const rainDrops = 150;
         
         for (let i = 0; i < rainDrops; i++) {
             const drop = document.createElement('div');
             drop.className = 'rain-drop';
+            const speed = 0.3 + Math.random() * 0.4;
+            const size = 1.5 + Math.random() * 1;
+            const opacity = 0.4 + Math.random() * 0.6;
+            
             drop.style.cssText = `
                 position: absolute;
-                width: 2px;
-                height: 20px;
-                background: linear-gradient(transparent, rgba(255,255,255,0.3), rgba(255,255,255,0.8));
-                left: ${Math.random() * 100}%;
-                animation: rainFall ${0.5 + Math.random() * 0.5}s linear infinite;
+                width: ${size}px;
+                height: ${15 + Math.random() * 10}px;
+                background: linear-gradient(transparent, rgba(135,206,235,${opacity}), rgba(255,255,255,${opacity + 0.2}));
+                left: ${Math.random() * 110}%;
+                animation: rainFall ${speed}s linear infinite;
                 animation-delay: ${Math.random() * 2}s;
+                transform: rotate(${10 + Math.random() * 5}deg);
+                border-radius: 0 0 50% 50%;
             `;
             
             this.animationContainer.appendChild(drop);
             this.animationElements.push(drop);
         }
 
-        // Add rain animation keyframes
+        // Add wind effect
+        for (let i = 0; i < 3; i++) {
+            const wind = document.createElement('div');
+            wind.className = 'wind-line';
+            wind.style.cssText = `
+                position: absolute;
+                width: 100px;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+                top: ${20 + i * 30}%;
+                left: -100px;
+                animation: windMove ${2 + Math.random()}s linear infinite;
+                animation-delay: ${i * 0.5}s;
+            `;
+            this.animationContainer.appendChild(wind);
+            this.animationElements.push(wind);
+        }
+
         this.addCSS(`
             @keyframes rainFall {
                 0% {
-                    top: -20px;
+                    top: -30px;
+                    opacity: 0;
+                }
+                10% {
+                    opacity: 1;
+                }
+                90% {
                     opacity: 1;
                 }
                 100% {
                     top: 100vh;
-                    opacity: 0.3;
+                    opacity: 0;
+                }
+            }
+            @keyframes windMove {
+                0% {
+                    left: -100px;
+                    opacity: 0;
+                }
+                50% {
+                    opacity: 1;
+                }
+                100% {
+                    left: calc(100% + 100px);
+                    opacity: 0;
                 }
             }
         `);
@@ -222,21 +264,33 @@ class WeatherAnimations {
 
     // Cloud animation
     createCloudAnimation() {
-        const cloudCount = 5;
+        const cloudCount = 8;
         
         for (let i = 0; i < cloudCount; i++) {
             const cloud = document.createElement('div');
             cloud.className = 'cloud';
-            cloud.innerHTML = '☁';
+            const size = 20 + Math.random() * 30;
+            const opacity = 0.2 + Math.random() * 0.4;
+            const speed = 15 + Math.random() * 20;
+            
             cloud.style.cssText = `
                 position: absolute;
-                color: rgba(255,255,255,0.3);
-                font-size: ${30 + Math.random() * 20}px;
-                top: ${Math.random() * 40}%;
-                left: -50px;
-                animation: cloudFloat ${20 + Math.random() * 10}s linear infinite;
-                animation-delay: ${Math.random() * 5}s;
+                width: ${size * 2}px;
+                height: ${size}px;
+                background: rgba(255,255,255,${opacity});
+                border-radius: ${size}px;
+                top: ${Math.random() * 60}%;
+                left: -${size * 2}px;
+                animation: cloudFloat ${speed}s linear infinite;
+                animation-delay: ${Math.random() * 8}s;
+                box-shadow: 
+                    ${size * 0.5}px 0 0 -${size * 0.2}px rgba(255,255,255,${opacity * 0.8}),
+                    -${size * 0.5}px 0 0 -${size * 0.2}px rgba(255,255,255,${opacity * 0.8}),
+                    0 ${size * 0.3}px 0 -${size * 0.3}px rgba(255,255,255,${opacity * 0.6});
             `;
+            
+            // Add subtle vertical movement
+            cloud.style.animation += `, cloudBob ${3 + Math.random() * 2}s ease-in-out infinite alternate`;
             
             this.animationContainer.appendChild(cloud);
             this.animationElements.push(cloud);
@@ -245,10 +299,20 @@ class WeatherAnimations {
         this.addCSS(`
             @keyframes cloudFloat {
                 0% {
-                    left: -50px;
+                    left: -100px;
+                    transform: translateY(0);
                 }
                 100% {
-                    left: calc(100% + 50px);
+                    left: calc(100% + 100px);
+                    transform: translateY(0);
+                }
+            }
+            @keyframes cloudBob {
+                0% {
+                    transform: translateY(0px);
+                }
+                100% {
+                    transform: translateY(-10px);
                 }
             }
         `);
@@ -256,18 +320,63 @@ class WeatherAnimations {
 
     // Sun animation
     createSunAnimation() {
+        // Main sun
         const sun = document.createElement('div');
         sun.className = 'sun';
         sun.style.cssText = `
             position: absolute;
             top: 10%;
             right: 10%;
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle, rgba(255,223,0,0.8), rgba(255,165,0,0.4), transparent);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,223,0,0.9), rgba(255,165,0,0.6), rgba(255,140,0,0.3), transparent);
             border-radius: 50%;
-            animation: sunGlow 3s ease-in-out infinite alternate;
+            animation: sunGlow 4s ease-in-out infinite alternate, sunRotate 20s linear infinite;
         `;
+        
+        // Sun rays
+        for (let i = 0; i < 12; i++) {
+            const ray = document.createElement('div');
+            ray.className = 'sun-ray';
+            const angle = (i * 30) * Math.PI / 180;
+            const length = 40 + Math.random() * 20;
+            
+            ray.style.cssText = `
+                position: absolute;
+                top: calc(10% + 50px);
+                right: calc(10% + 50px);
+                width: 3px;
+                height: ${length}px;
+                background: linear-gradient(rgba(255,223,0,0.8), transparent);
+                transform-origin: 1.5px 0;
+                transform: rotate(${i * 30}deg) translateY(-60px);
+                animation: rayPulse ${2 + Math.random()}s ease-in-out infinite alternate;
+                animation-delay: ${i * 0.1}s;
+                border-radius: 2px;
+            `;
+            
+            this.animationContainer.appendChild(ray);
+            this.animationElements.push(ray);
+        }
+        
+        // Sun sparkles
+        for (let i = 0; i < 6; i++) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sun-sparkle';
+            sparkle.innerHTML = '✦';
+            sparkle.style.cssText = `
+                position: absolute;
+                color: rgba(255,223,0,0.7);
+                font-size: ${8 + Math.random() * 6}px;
+                top: ${8 + Math.random() * 15}%;
+                right: ${8 + Math.random() * 15}%;
+                animation: sparkle ${1 + Math.random() * 2}s ease-in-out infinite alternate;
+                animation-delay: ${Math.random() * 2}s;
+            `;
+            
+            this.animationContainer.appendChild(sparkle);
+            this.animationElements.push(sparkle);
+        }
         
         this.animationContainer.appendChild(sun);
         this.animationElements.push(sun);
@@ -275,12 +384,40 @@ class WeatherAnimations {
         this.addCSS(`
             @keyframes sunGlow {
                 0% {
-                    box-shadow: 0 0 20px rgba(255,223,0,0.5);
+                    box-shadow: 0 0 30px rgba(255,223,0,0.6), 0 0 60px rgba(255,165,0,0.4);
                     transform: scale(1);
                 }
                 100% {
-                    box-shadow: 0 0 40px rgba(255,223,0,0.8);
-                    transform: scale(1.1);
+                    box-shadow: 0 0 50px rgba(255,223,0,0.9), 0 0 100px rgba(255,165,0,0.6);
+                    transform: scale(1.05);
+                }
+            }
+            @keyframes sunRotate {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+            @keyframes rayPulse {
+                0% {
+                    opacity: 0.3;
+                    transform: rotate(var(--ray-angle, 0deg)) translateY(-60px) scale(1);
+                }
+                100% {
+                    opacity: 0.8;
+                    transform: rotate(var(--ray-angle, 0deg)) translateY(-60px) scale(1.2);
+                }
+            }
+            @keyframes sparkle {
+                0% {
+                    opacity: 0.4;
+                    transform: scale(0.8) rotate(0deg);
+                }
+                100% {
+                    opacity: 1;
+                    transform: scale(1.2) rotate(180deg);
                 }
             }
         `);

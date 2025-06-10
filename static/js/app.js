@@ -192,9 +192,42 @@ class WeatherApp {
     }
 
     toggleTemperatureUnit() {
-        // This would require backend support to store user preference
-        // For now, we'll show a notification
-        this.showNotification('Unit switching will be available in a future update', 'info');
+        const tempElements = document.querySelectorAll('[data-temp-celsius]');
+        const currentUnit = localStorage.getItem('weather-temp-unit') || 'celsius';
+        const newUnit = currentUnit === 'celsius' ? 'fahrenheit' : 'celsius';
+        
+        tempElements.forEach(element => {
+            const celsius = parseFloat(element.dataset.tempCelsius);
+            const fahrenheit = parseFloat(element.dataset.tempFahrenheit);
+            const tempValue = element.querySelector('.temp-value');
+            const tempUnitSpan = element.querySelector('.temp-unit');
+            
+            if (tempValue && tempUnitSpan) {
+                if (newUnit === 'fahrenheit') {
+                    tempValue.textContent = fahrenheit;
+                    tempUnitSpan.textContent = 'F';
+                } else {
+                    tempValue.textContent = celsius;
+                    tempUnitSpan.textContent = 'C';
+                }
+            }
+        });
+        
+        // Update other temperature displays
+        document.querySelectorAll('[data-temp-value]').forEach(element => {
+            const celsius = parseFloat(element.dataset.tempValue);
+            if (!isNaN(celsius)) {
+                if (newUnit === 'fahrenheit') {
+                    const fahrenheit = Math.round((celsius * 9/5) + 32);
+                    element.textContent = `${fahrenheit}°F`;
+                } else {
+                    element.textContent = `${celsius}°C`;
+                }
+            }
+        });
+        
+        localStorage.setItem('weather-temp-unit', newUnit);
+        this.showNotification(`Temperature unit changed to °${newUnit === 'celsius' ? 'C' : 'F'}`, 'success');
     }
 
     handleSearchSubmit(e) {
