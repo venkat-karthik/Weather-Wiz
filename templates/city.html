@@ -188,14 +188,8 @@
 
 {% block extra_scripts %}
 <script>
-// Initialize weather animations
+// No weather animations on city page
 document.addEventListener('DOMContentLoaded', function() {
-    {% if weather %}
-    const condition = '{{ weather.condition }}';
-    const isDay = new Date().getHours() >= 6 && new Date().getHours() < 20;
-    initWeatherAnimation(condition, isDay);
-    {% endif %}
-    
     // Auto-refresh every 15 minutes
     setTimeout(function() {
         location.reload();

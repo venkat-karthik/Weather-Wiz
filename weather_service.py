@@ -102,42 +102,61 @@ class WeatherService:
             return []
     
     def get_daily_forecast(self, city: str) -> List[Dict]:
-        """Get daily forecast for a city (next 7 days)"""
+        """Get daily forecast for a city (next 5 days using standard forecast API)"""
         try:
-            # First get coordinates
-            current_weather = self.get_current_weather(city)
-            if not current_weather:
-                return []
-            
-            coords = current_weather['coordinates']
-            url = f"{self.base_url}/onecall"
+            url = f"{self.base_url}/forecast"
             params = {
-                'lat': coords['lat'],
-                'lon': coords['lon'],
+                'q': city,
                 'appid': self.api_key,
-                'units': 'metric',
-                'exclude': 'minutely,alerts'
+                'units': 'metric'
             }
             
             response = requests.get(url, params=params, timeout=10)
             response.raise_for_status()
             data = response.json()
             
-            daily_data = []
-            for item in data['daily'][:7]:  # Next 7 days
-                forecast_item = {
-                    'date': item['dt'],
-                    'temp_max': round(item['temp']['max']),
-                    'temp_min': round(item['temp']['min']),
-                    'description': item['weather'][0]['description'].title(),
-                    'icon': item['weather'][0]['icon'],
-                    'precipitation': item.get('pop', 0) * 100,  # Convert to percentage
-                    'humidity': item['humidity'],
-                    'wind_speed': item['wind_speed']
-                }
-                daily_data.append(forecast_item)
+            # Group by date to create daily forecasts
+            daily_data = {}
+            for item in data['list']:
+                date = datetime.fromtimestamp(item['dt']).date()
+                
+                if date not in daily_data:
+                    daily_data[date] = {
+                        'date': item['dt'],
+                        'temps': [],
+                        'descriptions': [],
+                        'icons': [],
+                        'precipitations': [],
+                        'humidity': [],
+                        'wind_speeds': []
+                    }
+                
+                daily_data[date]['temps'].append(item['main']['temp'])
+                daily_data[date]['descriptions'].append(item['weather'][0]['description'])
+                daily_data[date]['icons'].append(item['weather'][0]['icon'])
+                daily_data[date]['precipitations'].append(item.get('pop', 0) * 100)
+                daily_data[date]['humidity'].append(item['main']['humidity'])
+                daily_data[date]['wind_speeds'].append(item['wind']['speed'])
             
-            return daily_data
+            # Process daily data
+            forecast_data = []
+            for date, day_data in list(daily_data.items())[:5]:  # Next 5 days
+                # Use most common description and icon (noon time preferred)
+                mid_index = len(day_data['descriptions']) // 2
+                
+                forecast_item = {
+                    'date': day_data['date'],
+                    'temp_max': round(max(day_data['temps'])),
+                    'temp_min': round(min(day_data['temps'])),
+                    'description': day_data['descriptions'][mid_index].title(),
+                    'icon': day_data['icons'][mid_index],
+                    'precipitation': round(max(day_data['precipitations'])),
+                    'humidity': round(sum(day_data['humidity']) / len(day_data['humidity'])),
+                    'wind_speed': round(sum(day_data['wind_speeds']) / len(day_data['wind_speeds']), 1)
+                }
+                forecast_data.append(forecast_item)
+            
+            return forecast_data
             
         except requests.exceptions.RequestException as e:
             logging.error(f"API request failed for daily forecast {city}: {str(e)}")

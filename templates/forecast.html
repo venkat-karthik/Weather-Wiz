@@ -136,13 +136,9 @@
 
 {% block extra_scripts %}
 <script>
-// Initialize weather animations
+// No weather animations on forecast page
 document.addEventListener('DOMContentLoaded', function() {
-    {% if current_weather %}
-    const condition = '{{ current_weather.condition }}';
-    const isDay = new Date().getHours() >= 6 && new Date().getHours() < 20;
-    initWeatherAnimation(condition, isDay);
-    {% endif %}
+    // Page-specific functionality can go here
 });
 </script>
 {% endblock %}
