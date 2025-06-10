@@ -206,9 +206,9 @@ function initializeLayerControls() {
     });
 }
 
-// Error handling for map tiles
+// Initialize everything
 document.addEventListener('DOMContentLoaded', function() {
-    // Add error handling for when API key is not available
+    // Check if API key is available
     if (!API_KEY || API_KEY === 'your_api_key_here') {
         const mapContainer = document.getElementById('weather-map');
         mapContainer.innerHTML = `
@@ -221,6 +221,28 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         feather.replace();
+    } else {
+        // Initialize map with proper error handling
+        try {
+            initializeMap();
+            initializeLayerControls();
+        } catch (error) {
+            console.error('Map initialization failed:', error);
+            const mapContainer = document.getElementById('weather-map');
+            mapContainer.innerHTML = `
+                <div class="d-flex align-items-center justify-content-center h-100 text-center">
+                    <div>
+                        <i data-feather="map-pin" class="mb-3" style="width: 48px; height: 48px;"></i>
+                        <h5>Map Loading Error</h5>
+                        <p class="text-muted">Unable to load the weather map. Please try refreshing the page.</p>
+                        <button class="btn btn-primary" onclick="location.reload()">
+                            <i data-feather="refresh-cw"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            `;
+            feather.replace();
+        }
     }
 });
 </script>
