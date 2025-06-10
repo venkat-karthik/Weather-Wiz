@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}{{ current_city }} - Weather Map{% endblock %}
+
+{% block extra_head %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <!-- Map Controls -->
+        <div class="card glass-effect">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h4 class="mb-0"><i data-feather="map"></i> Weather Map - {{ current_city }}</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="map-controls">
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="mapLayer" id="temp" value="temp" checked>
+                                <label class="btn btn-outline-primary btn-sm" for="temp">
+                                    <i data-feather="thermometer"></i> Temperature
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="mapLayer" id="precipitation" value="precipitation">
+                                <label class="btn btn-outline-primary btn-sm" for="precipitation">
+                                    <i data-feather="cloud-rain"></i> Precipitation
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="mapLayer" id="clouds" value="clouds">
+                                <label class="btn btn-outline-primary btn-sm" for="clouds">
+                                    <i data-feather="cloud"></i> Clouds
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="mapLayer" id="wind" value="wind">
+                                <label class="btn btn-outline-primary btn-sm" for="wind">
+                                    <i data-feather="wind"></i> Wind
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Map Container -->
+                <div id="weather-map" style="height: 500px; border-radius: 0.5rem;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Map Legend -->
+    <div class="col-12">
+        <div class="card glass-effect">
+            <div class="card-header">
+                <h5 class="mb-0"><i data-feather="info"></i> Map Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Current Layer: <span id="current-layer">Temperature</span></h6>
+                        <p class="text-muted mb-0">
+                            <span id="layer-description">
+                                Temperature overlay showing current temperature distribution across the region.
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="map-legend">
+                            <h6>Legend:</h6>
+                            <div id="temp-legend" class="legend-items">
+                                <span class="legend-item"><span class="legend-color" style="background: blue;"></span> Cold (&lt; 0°C)</span>
+                                <span class="legend-item"><span class="legend-color" style="background: cyan;"></span> Cool (0-10°C)</span>
+                                <span class="legend-item"><span class="legend-color" style="background: yellow;"></span> Warm (10-25°C)</span>
+                                <span class="legend-item"><span class="legend-color" style="background: red;"></span> Hot (&gt; 25°C)</span>
+                            </div>
+                            <div id="precipitation-legend" class="legend-items" style="display: none;">
+                                <span class="legend-item"><span class="legend-color" style="background: lightblue;"></span> Light</span>
+                                <span class="legend-item"><span class="legend-color" style="background: blue;"></span> Moderate</span>
+                                <span class="legend-item"><span class="legend-color" style="background: darkblue;"></span> Heavy</span>
+                            </div>
+                            <div id="clouds-legend" class="legend-items" style="display: none;">
+                                <span class="legend-item"><span class="legend-color" style="background: white;"></span> Clear</span>
+                                <span class="legend-item"><span class="legend-color" style="background: lightgray;"></span> Partly Cloudy</span>
+                                <span class="legend-item"><span class="legend-color" style="background: gray;"></span> Overcast</span>
+                            </div>
+                            <div id="wind-legend" class="legend-items" style="display: none;">
+                                <span class="legend-item"><span class="legend-color" style="background: lightgreen;"></span> Light (&lt; 5 m/s)</span>
+                                <span class="legend-item"><span class="legend-color" style="background: yellow;"></span> Moderate (5-10 m/s)</span>
+                                <span class="legend-item"><span class="legend-color" style="background: orange;"></span> Strong (&gt; 10 m/s)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+let weatherMap;
+let currentWeatherLayer;
+const API_KEY = '{{ api_key }}';
+const coordinates = {{ coordinates|tojson }};
+
+// Layer configurations
+const layerConfigs = {
+    temp: {
+        name: 'Temperature',
+        description: 'Temperature overlay showing current temperature distribution across the region.',
+        url: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${API_KEY}`
+    },
+    precipitation: {
+        name: 'Precipitation',
+        description: 'Precipitation overlay showing current and forecasted rainfall intensity.',
+        url: `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`
+    },
+    clouds: {
+        name: 'Clouds',
+        description: 'Cloud coverage overlay showing current cloud distribution and density.',
+        url: `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${API_KEY}`
+    },
+    wind: {
+        name: 'Wind',
+        description: 'Wind speed overlay showing current wind patterns and intensity.',
+        url: `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${API_KEY}`
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMap();
+    initializeLayerControls();
+    
+    // Initialize weather animation
+    initWeatherAnimation('Clear', true);
+});
+
+function initializeMap() {
+    // Initialize the map
+    weatherMap = L.map('weather-map').setView([coordinates.lat, coordinates.lon], 10);
+    
+    // Add base tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(weatherMap);
+    
+    // Add city marker
+    L.marker([coordinates.lat, coordinates.lon])
+        .addTo(weatherMap)
+        .bindPopup(`<b>{{ current_city }}</b><br>Current location`)
+        .openPopup();
+    
+    // Add initial weather layer (temperature)
+    addWeatherLayer('temp');
+}
+
+function addWeatherLayer(layerType) {
+    // Remove existing weather layer
+    if (currentWeatherLayer) {
+        weatherMap.removeLayer(currentWeatherLayer);
+    }
+    
+    // Add new weather layer
+    const config = layerConfigs[layerType];
+    currentWeatherLayer = L.tileLayer(config.url, {
+        attribution: 'Weather data © OpenWeatherMap',
+        opacity: 0.6
+    }).addTo(weatherMap);
+    
+    // Update UI
+    updateLayerInfo(layerType);
+}
+
+function updateLayerInfo(layerType) {
+    const config = layerConfigs[layerType];
+    document.getElementById('current-layer').textContent = config.name;
+    document.getElementById('layer-description').textContent = config.description;
+    
+    // Hide all legends
+    document.querySelectorAll('.legend-items').forEach(legend => {
+        legend.style.display = 'none';
+    });
+    
+    // Show current legend
+    const currentLegend = document.getElementById(`${layerType}-legend`);
+    if (currentLegend) {
+        currentLegend.style.display = 'block';
+    }
+}
+
+function initializeLayerControls() {
+    const layerControls = document.querySelectorAll('input[name="mapLayer"]');
+    layerControls.forEach(control => {
+        control.addEventListener('change', function() {
+            if (this.checked) {
+                addWeatherLayer(this.value);
+            }
+        });
+    });
+}
+
+// Error handling for map tiles
+document.addEventListener('DOMContentLoaded', function() {
+    // Add error handling for when API key is not available
+    if (!API_KEY || API_KEY === 'your_api_key_here') {
+        const mapContainer = document.getElementById('weather-map');
+        mapContainer.innerHTML = `
+            <div class="d-flex align-items-center justify-content-center h-100 text-center">
+                <div>
+                    <i data-feather="alert-circle" class="mb-3" style="width: 48px; height: 48px;"></i>
+                    <h5>Weather Map Unavailable</h5>
+                    <p class="text-muted">Weather map requires an API key to display weather overlays.</p>
+                </div>
+            </div>
+        `;
+        feather.replace();
+    }
+});
+</script>
+{% endblock %}

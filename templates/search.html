@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Search Cities - Weather App{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <!-- Add City Form -->
+        <div class="card glass-effect mb-4">
+            <div class="card-header">
+                <h4 class="mb-0"><i data-feather="search"></i> Add New City</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('search') }}">
+                    <input type="hidden" name="action" value="add">
+                    <div class="input-group">
+                        <input type="text" class="form-control form-control-lg" name="city_name" 
+                               placeholder="Enter city name (e.g., London, Tokyo, New York)" required>
+                        <button class="btn btn-primary" type="submit">
+                            <i data-feather="plus"></i> Add City
+                        </button>
+                    </div>
+                    <div class="form-text">
+                        Enter the name of any city worldwide to add it to your weather dashboard.
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Saved Cities -->
+        <div class="card glass-effect">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i data-feather="map-pin"></i> Your Cities</h4>
+                <span class="badge bg-primary">{{ saved_cities|length }} cities</span>
+            </div>
+            <div class="card-body">
+                {% if saved_cities %}
+                <div class="row g-3">
+                    {% for city in saved_cities %}
+                    <div class="col-md-6">
+                        <div class="card city-card">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-8">
+                                        <h6 class="mb-1">{{ city }}</h6>
+                                        <div class="city-actions">
+                                            <a href="{{ url_for('index', city=city) }}" class="btn btn-sm btn-outline-primary me-2">
+                                                <i data-feather="eye"></i> View
+                                            </a>
+                                            <a href="{{ url_for('forecast', city=city) }}" class="btn btn-sm btn-outline-secondary me-2">
+                                                <i data-feather="calendar"></i> Forecast
+                                            </a>
+                                            <a href="{{ url_for('weather_map', city=city) }}" class="btn btn-sm btn-outline-info">
+                                                <i data-feather="map"></i> Map
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                        <form method="POST" action="{{ url_for('search') }}" class="d-inline">
+                                            <input type="hidden" name="action" value="remove">
+                                            <input type="hidden" name="city_to_remove" value="{{ city }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="return confirm('Remove {{ city }} from your cities?')">
+                                                <i data-feather="trash-2"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i data-feather="map-pin" class="mb-3 text-muted" style="width: 48px; height: 48px;"></i>
+                    <h5 class="text-muted mb-3">No Cities Added Yet</h5>
+                    <p class="text-muted">Add your first city using the search form above to get started with personalized weather updates.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Popular Cities Quick Add -->
+        <div class="card glass-effect mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i data-feather="globe"></i> Popular Cities</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    {% for city in ['London', 'New York', 'Tokyo', 'Paris', 'Sydney', 'Dubai', 'Singapore', 'Los Angeles'] %}
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <form method="POST" action="{{ url_for('search') }}" class="d-inline w-100">
+                            <input type="hidden" name="action" value="add">
+                            <input type="hidden" name="city_name" value="{{ city }}">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
+                                <i data-feather="plus"></i> {{ city }}
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto-focus on city input
+document.addEventListener('DOMContentLoaded', function() {
+    const cityInput = document.querySelector('input[name="city_name"]');
+    if (cityInput) {
+        cityInput.focus();
+    }
+    
+    // Initialize weather animation with default condition
+    initWeatherAnimation('Clear', true);
+});
+</script>
+{% endblock %}

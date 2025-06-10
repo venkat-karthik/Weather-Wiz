@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}{{ current_city }} - Weather Forecast{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Current Weather Summary -->
+    {% if current_weather %}
+    <div class="col-12 mb-4">
+        <div class="card glass-effect">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center">
+                        <img src="https://openweathermap.org/img/wn/{{ current_weather.icon }}@2x.png" 
+                             alt="{{ current_weather.description }}" class="img-fluid">
+                    </div>
+                    <div class="col-md-6">
+                        <h2 class="mb-0">{{ current_weather.location }}</h2>
+                        <p class="text-muted mb-0">{{ current_weather.description }}</p>
+                        <h3 class="mb-0">{{ current_weather.temperature }}°C</h3>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <a href="{{ url_for('index', city=current_city) }}" class="btn btn-outline-primary">
+                            <i data-feather="arrow-left"></i> Back to Current
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Hourly Forecast -->
+    {% if hourly_forecast %}
+    <div class="col-12 mb-4">
+        <div class="card glass-effect">
+            <div class="card-header">
+                <h4 class="mb-0"><i data-feather="clock"></i> 24-Hour Forecast</h4>
+            </div>
+            <div class="card-body">
+                <div class="hourly-forecast">
+                    {% for hour in hourly_forecast %}
+                    <div class="hourly-item">
+                        <div class="hour-time">{{ hour.time|timestamp_to_time }}</div>
+                        <div class="hour-icon">
+                            <img src="https://openweathermap.org/img/wn/{{ hour.icon }}.png" 
+                                 alt="{{ hour.description }}" class="img-fluid">
+                        </div>
+                        <div class="hour-temp">{{ hour.temperature }}°</div>
+                        {% if hour.precipitation > 0 %}
+                        <div class="hour-precip">
+                            <i data-feather="cloud-rain"></i> {{ hour.precipitation|round|int }}%
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Daily Forecast -->
+    {% if daily_forecast %}
+    <div class="col-12 mb-4">
+        <div class="card glass-effect">
+            <div class="card-header">
+                <h4 class="mb-0"><i data-feather="calendar"></i> 7-Day Forecast</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    {% for day in daily_forecast %}
+                    <div class="col-lg-6 col-xl-4">
+                        <div class="card daily-forecast-card">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-4">
+                                        <div class="day-name">{{ day.date|timestamp_to_day }}</div>
+                                        <div class="day-date text-muted">{{ day.date|timestamp_to_date }}</div>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png" 
+                                             alt="{{ day.description }}" class="img-fluid">
+                                        <div class="day-condition">{{ day.description }}</div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                        <div class="day-temp-high">{{ day.temp_max }}°</div>
+                                        <div class="day-temp-low text-muted">{{ day.temp_min }}°</div>
+                                        {% if day.precipitation > 0 %}
+                                        <div class="day-precip">
+                                            <i data-feather="cloud-rain"></i> {{ day.precipitation|round|int }}%
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <small class="text-muted">
+                                            <i data-feather="droplets"></i> {{ day.humidity }}%
+                                        </small>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <small class="text-muted">
+                                            <i data-feather="wind"></i> {{ "%.1f"|format(day.wind_speed) }} m/s
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if not hourly_forecast and not daily_forecast %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card glass-effect">
+            <div class="card-body text-center py-5">
+                <i data-feather="calendar-x" class="mb-3" style="width: 64px; height: 64px;"></i>
+                <h3>Forecast Data Unavailable</h3>
+                <p class="text-muted">Unable to fetch forecast information at the moment. Please try again later.</p>
+                <a href="{{ url_for('index', city=current_city) }}" class="btn btn-primary">
+                    <i data-feather="arrow-left"></i> Back to Current Weather
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Initialize weather animations
+document.addEventListener('DOMContentLoaded', function() {
+    {% if current_weather %}
+    const condition = '{{ current_weather.condition }}';
+    const isDay = new Date().getHours() >= 6 && new Date().getHours() < 20;
+    initWeatherAnimation(condition, isDay);
+    {% endif %}
+});
+</script>
+{% endblock %}

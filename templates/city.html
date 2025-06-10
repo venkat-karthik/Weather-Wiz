@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}{{ weather.location if weather else current_city }} - Weather Details{% endblock %}
+
+{% block content %}
+{% if weather %}
+<div class="row">
+    <!-- City Weather Header -->
+    <div class="col-12 mb-4">
+        <div class="card weather-city-header glass-effect">
+            <div class="card-body text-center">
+                <h1 class="city-name">{{ weather.location }}</h1>
+                <div class="current-temp-large">{{ weather.temperature }}°</div>
+                <div class="weather-condition-large">{{ weather.description }}</div>
+                <div class="weather-icon-xl">
+                    <img src="https://openweathermap.org/img/wn/{{ weather.icon }}@4x.png" 
+                         alt="{{ weather.description }}" class="img-fluid">
+                </div>
+                <div class="last-updated-large text-muted">
+                    <i data-feather="refresh-cw"></i> Last updated {{ weather.last_updated }}
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="city-actions mt-3">
+                    <a href="{{ url_for('forecast', city=current_city) }}" class="btn btn-primary me-2">
+                        <i data-feather="calendar"></i> 7-Day Forecast
+                    </a>
+                    <a href="{{ url_for('weather_map', city=current_city) }}" class="btn btn-outline-primary">
+                        <i data-feather="map"></i> View Map
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed Weather Information -->
+    <div class="col-lg-8 mb-4">
+        <div class="card glass-effect">
+            <div class="card-header">
+                <h4 class="mb-0"><i data-feather="info"></i> Weather Details</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <!-- Temperature Details -->
+                    <div class="col-md-6">
+                        <div class="detail-group">
+                            <h6><i data-feather="thermometer"></i> Temperature</h6>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">Current</span>
+                                    <span class="detail-value">{{ weather.temperature }}°C</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Feels Like</span>
+                                    <span class="detail-value">{{ weather.feels_like }}°C</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Wind Details -->
+                    <div class="col-md-6">
+                        <div class="detail-group">
+                            <h6><i data-feather="wind"></i> Wind</h6>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">Speed</span>
+                                    <span class="detail-value">{{ "%.1f"|format(weather.wind_speed) }} m/s</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Direction</span>
+                                    <span class="detail-value">{{ weather.wind_direction }}°</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Atmospheric Details -->
+                    <div class="col-md-6">
+                        <div class="detail-group">
+                            <h6><i data-feather="activity"></i> Atmosphere</h6>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">Pressure</span>
+                                    <span class="detail-value">{{ weather.pressure }} hPa</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Humidity</span>
+                                    <span class="detail-value">{{ weather.humidity }}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Visibility & UV -->
+                    <div class="col-md-6">
+                        <div class="detail-group">
+                            <h6><i data-feather="eye"></i> Visibility & UV</h6>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">Visibility</span>
+                                    <span class="detail-value">{{ "%.1f"|format(weather.visibility) }} km</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">UV Index</span>
+                                    <span class="detail-value">{{ weather.uv_index }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sun Times & Hourly Preview -->
+    <div class="col-lg-4 mb-4">
+        <!-- Sun Times -->
+        <div class="card glass-effect mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i data-feather="sun"></i> Sun Times</h5>
+            </div>
+            <div class="card-body">
+                <div class="sun-times">
+                    <div class="sun-time-item">
+                        <i data-feather="sunrise"></i>
+                        <div>
+                            <div class="sun-label">Sunrise</div>
+                            <div class="sun-value">{{ weather.sunrise|timestamp_to_time }}</div>
+                        </div>
+                    </div>
+                    <div class="sun-time-item">
+                        <i data-feather="sunset"></i>
+                        <div>
+                            <div class="sun-label">Sunset</div>
+                            <div class="sun-value">{{ weather.sunset|timestamp_to_time }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Hourly Preview -->
+        {% if hourly_forecast %}
+        <div class="card glass-effect">
+            <div class="card-header">
+                <h5 class="mb-0"><i data-feather="clock"></i> Next Few Hours</h5>
+            </div>
+            <div class="card-body">
+                <div class="hourly-preview">
+                    {% for hour in hourly_forecast %}
+                    <div class="hourly-preview-item">
+                        <div class="hour-time-small">{{ hour.time|timestamp_to_time }}</div>
+                        <img src="https://openweathermap.org/img/wn/{{ hour.icon }}.png" 
+                             alt="{{ hour.description }}" class="hour-icon-small">
+                        <div class="hour-temp-small">{{ hour.temperature }}°</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('forecast', city=current_city) }}" class="btn btn-sm btn-outline-primary">
+                        <i data-feather="calendar"></i> View Full Forecast
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card glass-effect">
+            <div class="card-body text-center py-5">
+                <i data-feather="map-pin" class="mb-3" style="width: 64px; height: 64px;"></i>
+                <h3>City Not Found</h3>
+                <p class="text-muted">Unable to find weather information for "{{ current_city }}". Please check the city name and try again.</p>
+                <a href="{{ url_for('search') }}" class="btn btn-primary">
+                    <i data-feather="search"></i> Search for Cities
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Initialize weather animations
+document.addEventListener('DOMContentLoaded', function() {
+    {% if weather %}
+    const condition = '{{ weather.condition }}';
+    const isDay = new Date().getHours() >= 6 && new Date().getHours() < 20;
+    initWeatherAnimation(condition, isDay);
+    {% endif %}
+    
+    // Auto-refresh every 15 minutes
+    setTimeout(function() {
+        location.reload();
+    }, 900000);
+});
+</script>
+{% endblock %}
