@@ -1,31 +1,5 @@
-# Core Flask dependencies
 flask>=3.1.1
-flask-sqlalchemy>=3.1.1
-flask-migrate>=4.0.5
-flask-login>=0.6.3
-flask-wtf>=1.2.1
-flask-mail>=0.9.1
-
-# Database (using SQLite for Vercel deployment)
-# psycopg2-binary>=2.9.10
-
-# HTTP requests
 requests>=2.32.4
-
-# Environment and configuration
 python-dotenv>=1.0.0
-
-# Security and validation
 werkzeug>=3.0.0
-wtforms>=3.1.0
-email-validator>=2.2.0
-
-# Production server
-gunicorn>=23.0.0
-
-# Monitoring and error tracking
-sentry-sdk[flask]>=1.40.0
-psutil>=7.2.1
-
-# Template engine
 jinja2>=3.1.6
