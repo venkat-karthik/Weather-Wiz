@@ -1,0 +1,498 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Weather Wiz{% endblock %}
+
+{% block extra_head %}
+<style>
+    .auth-container {
+        max-width: 500px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
+    
+    .auth-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 40px;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        box-shadow: 0 8px 32px var(--shadow);
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .auth-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+    }
+    
+    .auth-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        background: var(--glass-bg);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.1);
+    }
+    
+    .form-input.valid {
+        border-color: #4CAF50;
+    }
+    
+    .form-input.invalid {
+        border-color: #f44336;
+    }
+    
+    .input-feedback {
+        font-size: 0.8rem;
+        margin-top: 5px;
+        padding-left: 5px;
+    }
+    
+    .input-feedback.valid {
+        color: #4CAF50;
+    }
+    
+    .input-feedback.invalid {
+        color: #f44336;
+    }
+    
+    .password-strength {
+        margin-top: 8px;
+    }
+    
+    .strength-bar {
+        height: 4px;
+        background: var(--glass-border);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 5px;
+    }
+    
+    .strength-fill {
+        height: 100%;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+    
+    .strength-weak { background: #f44336; width: 25%; }
+    .strength-fair { background: #ff9800; width: 50%; }
+    .strength-good { background: #2196f3; width: 75%; }
+    .strength-strong { background: #4caf50; width: 100%; }
+    
+    .strength-text {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+    
+    .auth-button {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .auth-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(100, 181, 246, 0.4);
+    }
+    
+    .auth-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .auth-links {
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .auth-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .auth-link:hover {
+        color: var(--primary-hover);
+        text-decoration: underline;
+    }
+    
+    .divider {
+        text-align: center;
+        margin: 20px 0;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    
+    .error-message {
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        color: var(--text-primary);
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 600px) {
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+        
+        .auth-container {
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        
+        .auth-card {
+            padding: 30px 20px;
+        }
+        
+        .auth-title {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">Join Weather Wiz</h1>
+            <p class="auth-subtitle">Create your account to get personalized weather outfits</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="error-message">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" id="register-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" id="first_name" name="first_name" class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" class="form-input">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address *</label>
+                <input type="email" id="email" name="email" class="form-input" required>
+                <div id="email-feedback" class="input-feedback"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="username" class="form-label">Username *</label>
+                <input type="text" id="username" name="username" class="form-input" required>
+                <div id="username-feedback" class="input-feedback"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password *</label>
+                <input type="password" id="password" name="password" class="form-input" required>
+                <div class="password-strength">
+                    <div class="strength-bar">
+                        <div id="strength-fill" class="strength-fill"></div>
+                    </div>
+                    <div id="strength-text" class="strength-text">Enter a password</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm Password *</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
+                <div id="confirm-password-feedback" class="input-feedback"></div>
+            </div>
+            
+            <button type="submit" class="auth-button" id="register-button">Create Account</button>
+        </form>
+        
+        <div class="divider">Already have an account?</div>
+        
+        <div class="auth-links">
+            <a href="{{ url_for('auth.login') }}" class="auth-link">Sign in here</a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('register-form');
+    const emailInput = document.getElementById('email');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const registerButton = document.getElementById('register-button');
+    
+    let validationState = {
+        email: false,
+        username: false,
+        password: false,
+        confirmPassword: false
+    };
+    
+    // Email validation
+    emailInput.addEventListener('blur', async function() {
+        const email = this.value.trim();
+        const feedback = document.getElementById('email-feedback');
+        
+        if (!email) {
+            this.classList.remove('valid', 'invalid');
+            feedback.textContent = '';
+            validationState.email = false;
+            updateSubmitButton();
+            return;
+        }
+        
+        if (!isValidEmail(email)) {
+            this.classList.add('invalid');
+            this.classList.remove('valid');
+            feedback.textContent = 'Please enter a valid email address';
+            feedback.className = 'input-feedback invalid';
+            validationState.email = false;
+            updateSubmitButton();
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/auth/api/check-email?email=${encodeURIComponent(email)}`);
+            const data = await response.json();
+            
+            if (data.available) {
+                this.classList.add('valid');
+                this.classList.remove('invalid');
+                feedback.textContent = 'Email is available';
+                feedback.className = 'input-feedback valid';
+                validationState.email = true;
+            } else {
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+                feedback.textContent = data.message;
+                feedback.className = 'input-feedback invalid';
+                validationState.email = false;
+            }
+        } catch (error) {
+            console.error('Error checking email:', error);
+        }
+        
+        updateSubmitButton();
+    });
+    
+    // Username validation
+    usernameInput.addEventListener('blur', async function() {
+        const username = this.value.trim();
+        const feedback = document.getElementById('username-feedback');
+        
+        if (!username) {
+            this.classList.remove('valid', 'invalid');
+            feedback.textContent = '';
+            validationState.username = false;
+            updateSubmitButton();
+            return;
+        }
+        
+        if (username.length < 3) {
+            this.classList.add('invalid');
+            this.classList.remove('valid');
+            feedback.textContent = 'Username must be at least 3 characters long';
+            feedback.className = 'input-feedback invalid';
+            validationState.username = false;
+            updateSubmitButton();
+            return;
+        }
+        
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            this.classList.add('invalid');
+            this.classList.remove('valid');
+            feedback.textContent = 'Username can only contain letters, numbers, and underscores';
+            feedback.className = 'input-feedback invalid';
+            validationState.username = false;
+            updateSubmitButton();
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/auth/api/check-username?username=${encodeURIComponent(username)}`);
+            const data = await response.json();
+            
+            if (data.available) {
+                this.classList.add('valid');
+                this.classList.remove('invalid');
+                feedback.textContent = 'Username is available';
+                feedback.className = 'input-feedback valid';
+                validationState.username = true;
+            } else {
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+                feedback.textContent = data.message;
+                feedback.className = 'input-feedback invalid';
+                validationState.username = false;
+            }
+        } catch (error) {
+            console.error('Error checking username:', error);
+        }
+        
+        updateSubmitButton();
+    });
+    
+    // Password strength validation
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        const strength = calculatePasswordStrength(password);
+        updatePasswordStrength(strength);
+        
+        validationState.password = strength.score >= 3;
+        updateSubmitButton();
+        
+        // Also check confirm password if it has a value
+        if (confirmPasswordInput.value) {
+            validateConfirmPassword();
+        }
+    });
+    
+    // Confirm password validation
+    confirmPasswordInput.addEventListener('input', validateConfirmPassword);
+    
+    function validateConfirmPassword() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const feedback = document.getElementById('confirm-password-feedback');
+        
+        if (!confirmPassword) {
+            confirmPasswordInput.classList.remove('valid', 'invalid');
+            feedback.textContent = '';
+            validationState.confirmPassword = false;
+            updateSubmitButton();
+            return;
+        }
+        
+        if (password === confirmPassword) {
+            confirmPasswordInput.classList.add('valid');
+            confirmPasswordInput.classList.remove('invalid');
+            feedback.textContent = 'Passwords match';
+            feedback.className = 'input-feedback valid';
+            validationState.confirmPassword = true;
+        } else {
+            confirmPasswordInput.classList.add('invalid');
+            confirmPasswordInput.classList.remove('valid');
+            feedback.textContent = 'Passwords do not match';
+            feedback.className = 'input-feedback invalid';
+            validationState.confirmPassword = false;
+        }
+        
+        updateSubmitButton();
+    }
+    
+    function calculatePasswordStrength(password) {
+        let score = 0;
+        let feedback = [];
+        
+        if (password.length >= 8) score++;
+        else feedback.push('at least 8 characters');
+        
+        if (/[a-z]/.test(password)) score++;
+        else feedback.push('lowercase letter');
+        
+        if (/[A-Z]/.test(password)) score++;
+        else feedback.push('uppercase letter');
+        
+        if (/\d/.test(password)) score++;
+        else feedback.push('number');
+        
+        if (/[^a-zA-Z0-9]/.test(password)) score++;
+        else feedback.push('special character');
+        
+        return { score, feedback };
+    }
+    
+    function updatePasswordStrength(strength) {
+        const fill = document.getElementById('strength-fill');
+        const text = document.getElementById('strength-text');
+        
+        fill.className = 'strength-fill';
+        
+        if (strength.score === 0) {
+            text.textContent = 'Enter a password';
+        } else if (strength.score <= 2) {
+            fill.classList.add('strength-weak');
+            text.textContent = `Weak - Add: ${strength.feedback.join(', ')}`;
+        } else if (strength.score === 3) {
+            fill.classList.add('strength-fair');
+            text.textContent = `Fair - Add: ${strength.feedback.join(', ')}`;
+        } else if (strength.score === 4) {
+            fill.classList.add('strength-good');
+            text.textContent = `Good - Add: ${strength.feedback.join(', ')}`;
+        } else {
+            fill.classList.add('strength-strong');
+            text.textContent = 'Strong password';
+        }
+    }
+    
+    function updateSubmitButton() {
+        const allValid = Object.values(validationState).every(valid => valid);
+        registerButton.disabled = !allValid;
+    }
+    
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+});
+</script>
+{% endblock %}

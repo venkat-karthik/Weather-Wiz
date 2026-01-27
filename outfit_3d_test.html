@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Outfit Visualization Test</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <style>
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            max-width: 350px;
+        }
+        
+        .test-controls h3 {
+            margin-top: 0;
+            color: #fff;
+        }
+        
+        .test-controls .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .test-controls label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .test-controls input,
+        .test-controls select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #333;
+            color: white;
+        }
+        
+        .test-controls button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 0;
+            transition: background 0.3s;
+        }
+        
+        .test-controls button:hover {
+            background: #0056b3;
+        }
+        
+        .weather-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            min-width: 200px;
+        }
+        
+        .weather-display h4 {
+            margin-top: 0;
+            color: #fff;
+        }
+        
+        .current-temp {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .weather-condition {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        
+        .weather-details {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+        }
+        
+        .theme-toggle button {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        
+        .theme-toggle button:hover {
+            background: #545b62;
+        }
+        
+        .info-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            max-width: 400px;
+        }
+        
+        .info-panel h4 {
+            margin-top: 0;
+            color: #fff;
+        }
+        
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .outfit-3d-container {
+            position: relative;
+            width: 100%;
+            height: 80vh;
+            background: linear-gradient(135deg, var(--glass-bg), rgba(255,255,255,0.05));
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+            margin: 20px;
+        }
+        
+        #outfit-3d-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .outfit-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .outfit-controls h5 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        .control-group {
+            margin-bottom: 1rem;
+        }
+        
+        .control-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        
+        .control-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border-radius: 0.25rem;
+            font-size: 0.8rem;
+        }
+        
+        .outfit-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            max-width: 300px;
+        }
+        
+        .outfit-info h5 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        .outfit-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+            font-size: 0.8rem;
+        }
+        
+        .outfit-item-label {
+            color: var(--text-muted);
+        }
+        
+        .outfit-item-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .outfit-actions {
+            display: flex;
+            gap: 1rem;
+            margin: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .outfit-btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .outfit-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--text-primary);
+            transform: translateY(-1px);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        .outfit-btn-primary {
+            background: linear-gradient(135deg, rgba(0,123,255,0.8), rgba(0,86,179,0.8));
+            border-color: rgba(0,123,255,0.5);
+            color: white;
+        }
+        
+        .outfit-btn-primary:hover {
+            background: linear-gradient(135deg, rgba(0,123,255,0.9), rgba(0,86,179,0.9));
+            color: white;
+        }
+        
+        .loading-3d {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body class="theme-light">
+    <!-- Test Controls -->
+    <div class="test-controls">
+        <h3>3D Outfit Test</h3>
+        
+        <div class="form-group">
+            <label for="test-temperature">Temperature (°C)</label>
+            <input type="number" id="test-temperature" value="24" min="-20" max="45">
+        </div>
+        
+        <div class="form-group">
+            <label for="test-condition">Weather Condition</label>
+            <select id="test-condition">
+                <option value="Clear">Clear/Sunny</option>
+                <option value="Clouds">Cloudy</option>
+                <option value="Rain">Rain</option>
+                <option value="Snow">Snow</option>
+                <option value="Thunderstorm">Storm</option>
+                <option value="Fog">Foggy</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="test-humidity">Humidity (%)</label>
+            <input type="number" id="test-humidity" value="60" min="0" max="100">
+        </div>
+        
+        <div class="form-group">
+            <label for="test-wind">Wind Speed (km/h)</label>
+            <input type="number" id="test-wind" value="15" min="0" max="100">
+        </div>
+        
+        <button onclick="updateWeatherDisplay()">Update Weather</button>
+        <button onclick="generateOutfit()">Generate Outfit</button>
+        <button onclick="startDemo()">Start Demo</button>
+    </div>
+    
+    <!-- Weather Display -->
+    <div class="weather-display">
+        <h4>Current Weather</h4>
+        <div class="current-temp" data-temp-celsius="24">24°C</div>
+        <div class="weather-condition">Clear</div>
+        <div class="weather-details">
+            <div>Humidity: <span data-humidity="60">60%</span></div>
+            <div>Wind: <span data-wind="15">15 km/h</span></div>
+        </div>
+    </div>
+    
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button onclick="toggleTheme('light')">Light</button>
+        <button onclick="toggleTheme('dark')">Dark</button>
+    </div>
+    
+    <!-- Info Panel -->
+    <div class="info-panel">
+        <h4>3D Outfit Visualization Features</h4>
+        <p><strong>Interactive 3D Model:</strong> Rotate, zoom, and explore the outfit</p>
+        <p><strong>Weather-Based Generation:</strong> Outfits adapt to temperature and conditions</p>
+        <p><strong>Multiple Styles:</strong> Casual, formal, sporty, and trendy options</p>
+        <p><strong>Color Customization:</strong> Choose from various color themes</p>
+        <p><strong>Camera Controls:</strong> Front, back, side, and top views</p>
+        <p><strong>Accessories:</strong> Sunglasses, hats, scarves, gloves, umbrellas</p>
+        <p><strong>Save & Share:</strong> Download images and share outfits</p>
+    </div>
+
+    <!-- 3D Outfit Visualization -->
+    <div class="outfit-3d-container">
+        <div class="loading-3d" id="loading-3d">Loading 3D visualization...</div>
+        <canvas id="outfit-3d-canvas"></canvas>
+        
+        <!-- Controls -->
+        <div class="outfit-controls">
+            <h5>Outfit Controls</h5>
+            <div class="control-group">
+                <label for="outfit-style">Style</label>
+                <select id="outfit-style">
+                    <option value="casual">Casual</option>
+                    <option value="formal">Formal</option>
+                    <option value="sporty">Sporty</option>
+                    <option value="trendy">Trendy</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="outfit-color">Color Theme</label>
+                <select id="outfit-color">
+                    <option value="blue">Blue</option>
+                    <option value="black">Black</option>
+                    <option value="white">White</option>
+                    <option value="gray">Gray</option>
+                    <option value="green">Green</option>
+                    <option value="red">Red</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="camera-view">Camera View</label>
+                <select id="camera-view">
+                    <option value="front">Front</option>
+                    <option value="back">Back</option>
+                    <option value="side">Side</option>
+                    <option value="top">Top</option>
+                </select>
+            </div>
+            <button class="outfit-btn outfit-btn-primary" onclick="generateOutfit()">
+                <i data-feather="refresh-cw"></i> Generate Outfit
+            </button>
+        </div>
+        
+        <!-- Outfit Info -->
+        <div class="outfit-info" id="outfit-info" style="display: none;">
+            <h5>Current Outfit</h5>
+            <div class="outfit-item">
+                <span class="outfit-item-label">Top:</span>
+                <span class="outfit-item-value" id="outfit-top">-</span>
+            </div>
+            <div class="outfit-item">
+                <span class="outfit-item-label">Bottom:</span>
+                <span class="outfit-item-value" id="outfit-bottom">-</span>
+            </div>
+            <div class="outfit-item">
+                <span class="outfit-item-label">Footwear:</span>
+                <span class="outfit-item-value" id="outfit-footwear">-</span>
+            </div>
+            <div class="outfit-item">
+                <span class="outfit-item-label">Accessories:</span>
+                <span class="outfit-item-value" id="outfit-accessories">-</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="outfit-actions">
+        <button class="outfit-btn" onclick="rotateModel()">
+            <i data-feather="rotate-cw"></i> Rotate Model
+        </button>
+        <button class="outfit-btn" onclick="resetCamera()">
+            <i data-feather="camera"></i> Reset Camera
+        </button>
+        <button class="outfit-btn" onclick="toggleWireframe()">
+            <i data-feather="grid"></i> Toggle Wireframe
+        </button>
+        <button class="outfit-btn outfit-btn-primary" onclick="saveOutfit()">
+            <i data-feather="download"></i> Save Outfit
+        </button>
+        <button class="outfit-btn" onclick="shareOutfit()">
+            <i data-feather="share-2"></i> Share
+        </button>
+    </div>
+
+    <!-- Three.js for 3D rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="static/js/outfit-3d.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        let outfitVisualizer = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            updateWeatherDisplay();
+            
+            // Initialize 3D visualization
+            const weatherData = {
+                temperature: 24,
+                description: 'Clear',
+                humidity: 60,
+                windSpeed: 15
+            };
+            
+            initOutfit3D(weatherData);
+        });
+        
+        // Update weather display
+        function updateWeatherDisplay() {
+            const temp = document.getElementById('test-temperature').value;
+            const condition = document.getElementById('test-condition').value;
+            const humidity = document.getElementById('test-humidity').value;
+            const wind = document.getElementById('test-wind').value;
+            
+            document.querySelector('.current-temp').textContent = temp + '°C';
+            document.querySelector('.current-temp').dataset.tempCelsius = temp;
+            document.querySelector('.weather-condition').textContent = condition;
+            document.querySelector('[data-humidity]').textContent = humidity + '%';
+            document.querySelector('[data-humidity]').dataset.humidity = humidity;
+            document.querySelector('[data-wind]').textContent = wind + ' km/h';
+            document.querySelector('[data-wind]').dataset.wind = wind;
+            
+            // Update 3D visualization if available
+            if (outfitVisualizer) {
+                outfitVisualizer.weatherData = {
+                    temperature: parseFloat(temp),
+                    description: condition,
+                    humidity: parseFloat(humidity),
+                    windSpeed: parseFloat(wind)
+                };
+            }
+        }
+        
+        // Generate outfit
+        function generateOutfit() {
+            if (outfitVisualizer) {
+                const style = document.getElementById('outfit-style').value;
+                const color = document.getElementById('outfit-color').value;
+                outfitVisualizer.generateOutfit(style, color);
+            }
+        }
+        
+        // Theme toggle
+        function toggleTheme(theme) {
+            const body = document.body;
+            if (theme === 'dark') {
+                body.className = 'theme-dark';
+            } else {
+                body.className = 'theme-light';
+            }
+        }
+        
+        // Auto-demo function
+        function startDemo() {
+            const weatherScenarios = [
+                { temp: 30, condition: 'Clear', humidity: 50, wind: 5 },
+                { temp: 20, condition: 'Clouds', humidity: 65, wind: 12 },
+                { temp: 10, condition: 'Rain', humidity: 85, wind: 20 },
+                { temp: -2, condition: 'Snow', humidity: 80, wind: 15 },
+                { temp: 25, condition: 'Clear', humidity: 60, wind: 8 }
+            ];
+            
+            let index = 0;
+            
+            function nextScenario() {
+                if (index < weatherScenarios.length) {
+                    const scenario = weatherScenarios[index];
+                    
+                    document.getElementById('test-temperature').value = scenario.temp;
+                    document.getElementById('test-condition').value = scenario.condition;
+                    document.getElementById('test-humidity').value = scenario.humidity;
+                    document.getElementById('test-wind').value = scenario.wind;
+                    
+                    updateWeatherDisplay();
+                    generateOutfit();
+                    
+                    index++;
+                    setTimeout(nextScenario, 10000); // Change every 10 seconds
+                } else {
+                    index = 0;
+                    setTimeout(nextScenario, 5000);
+                }
+            }
+            
+            nextScenario();
+        }
+        
+        // Add event listeners for camera view changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const cameraViewSelect = document.getElementById('camera-view');
+            if (cameraViewSelect) {
+                cameraViewSelect.addEventListener('change', function() {
+                    if (outfitVisualizer) {
+                        outfitVisualizer.setCameraView(this.value);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

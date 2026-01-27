@@ -5,6 +5,34 @@
 {% block extra_head %}
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #weather-map {
+        height: 500px;
+        border-radius: 0.5rem;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+    }
+    
+    .map-controls .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+    
+    .map-controls .btn {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        border: 1px solid var(--glass-border);
+        display: inline-block;
+        margin-right: 0.5rem;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -46,7 +74,7 @@
             </div>
             <div class="card-body">
                 <!-- Map Container -->
-                <div id="weather-map" style="height: 500px; border-radius: 0.5rem;"></div>
+                <div id="weather-map"></div>
             </div>
         </div>
     </div>
@@ -71,25 +99,25 @@
                         <div class="map-legend">
                             <h6>Legend:</h6>
                             <div id="temp-legend" class="legend-items">
-                                <span class="legend-item"><span class="legend-color" style="background: blue;"></span> Cold (&lt; 0°C)</span>
-                                <span class="legend-item"><span class="legend-color" style="background: cyan;"></span> Cool (0-10°C)</span>
-                                <span class="legend-item"><span class="legend-color" style="background: yellow;"></span> Warm (10-25°C)</span>
-                                <span class="legend-item"><span class="legend-color" style="background: red;"></span> Hot (&gt; 25°C)</span>
+                                <div class="legend-item"><span class="legend-color" style="background: #0000FF;"></span> Cold (&lt; 0°C)</div>
+                                <div class="legend-item"><span class="legend-color" style="background: #00FFFF;"></span> Cool (0-10°C)</div>
+                                <div class="legend-item"><span class="legend-color" style="background: #FFFF00;"></span> Warm (10-25°C)</div>
+                                <div class="legend-item"><span class="legend-color" style="background: #FF0000;"></span> Hot (&gt; 25°C)</div>
                             </div>
                             <div id="precipitation-legend" class="legend-items" style="display: none;">
-                                <span class="legend-item"><span class="legend-color" style="background: lightblue;"></span> Light</span>
-                                <span class="legend-item"><span class="legend-color" style="background: blue;"></span> Moderate</span>
-                                <span class="legend-item"><span class="legend-color" style="background: darkblue;"></span> Heavy</span>
+                                <div class="legend-item"><span class="legend-color" style="background: #ADD8E6;"></span> Light</div>
+                                <div class="legend-item"><span class="legend-color" style="background: #0000FF;"></span> Moderate</div>
+                                <div class="legend-item"><span class="legend-color" style="background: #000080;"></span> Heavy</div>
                             </div>
                             <div id="clouds-legend" class="legend-items" style="display: none;">
-                                <span class="legend-item"><span class="legend-color" style="background: white;"></span> Clear</span>
-                                <span class="legend-item"><span class="legend-color" style="background: lightgray;"></span> Partly Cloudy</span>
-                                <span class="legend-item"><span class="legend-color" style="background: gray;"></span> Overcast</span>
+                                <div class="legend-item"><span class="legend-color" style="background: #FFFFFF;"></span> Clear</div>
+                                <div class="legend-item"><span class="legend-color" style="background: #D3D3D3;"></span> Partly Cloudy</div>
+                                <div class="legend-item"><span class="legend-color" style="background: #808080;"></span> Overcast</div>
                             </div>
                             <div id="wind-legend" class="legend-items" style="display: none;">
-                                <span class="legend-item"><span class="legend-color" style="background: lightgreen;"></span> Light (&lt; 5 m/s)</span>
-                                <span class="legend-item"><span class="legend-color" style="background: yellow;"></span> Moderate (5-10 m/s)</span>
-                                <span class="legend-item"><span class="legend-color" style="background: orange;"></span> Strong (&gt; 10 m/s)</span>
+                                <div class="legend-item"><span class="legend-color" style="background: #90EE90;"></span> Light (&lt; 5 m/s)</div>
+                                <div class="legend-item"><span class="legend-color" style="background: #FFFF00;"></span> Moderate (5-10 m/s)</div>
+                                <div class="legend-item"><span class="legend-color" style="background: #FFA500;"></span> Strong (&gt; 10 m/s)</div>
                             </div>
                         </div>
                     </div>
@@ -105,8 +133,11 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+// Map variables
 let weatherMap;
 let currentWeatherLayer;
+
+// Configuration
 const API_KEY = '{{ api_key }}';
 const coordinates = {{ coordinates|tojson }};
 
@@ -115,53 +146,32 @@ const layerConfigs = {
     temp: {
         name: 'Temperature',
         description: 'Temperature overlay showing current temperature distribution across the region.',
-        url: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${API_KEY}`
+        url: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=' + API_KEY
     },
     precipitation: {
         name: 'Precipitation',
         description: 'Precipitation overlay showing current and forecasted rainfall intensity.',
-        url: `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`
+        url: 'https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=' + API_KEY
     },
     clouds: {
         name: 'Clouds',
         description: 'Cloud coverage overlay showing current cloud distribution and density.',
-        url: `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${API_KEY}`
+        url: 'https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=' + API_KEY
     },
     wind: {
         name: 'Wind',
-        description: 'Wind speed overlay showing current wind patterns and intensity.',
-        url: `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${API_KEY}`
+        description: 'Wind patterns showing current wind speed and direction.',
+        url: 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=' + API_KEY
     }
 };
 
-document.addEventListener('DOMContentLoaded', function() {
-    initializeMap();
-    initializeLayerControls();
-    
-    // Initialize weather animation
-    initWeatherAnimation('Clear', true);
-});
-
-function initializeMap() {
-    // Initialize the map
-    weatherMap = L.map('weather-map').setView([coordinates.lat, coordinates.lon], 10);
-    
-    // Add base tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(weatherMap);
-    
-    // Add city marker
-    L.marker([coordinates.lat, coordinates.lon])
-        .addTo(weatherMap)
-        .bindPopup(`<b>{{ current_city }}</b><br>Current location`)
-        .openPopup();
-    
-    // Add initial weather layer (temperature)
-    addWeatherLayer('temp');
-}
-
+// Functions
 function addWeatherLayer(layerType) {
+    if (!weatherMap) {
+        console.error('Map not initialized');
+        return;
+    }
+    
     // Remove existing weather layer
     if (currentWeatherLayer) {
         weatherMap.removeLayer(currentWeatherLayer);
@@ -169,6 +179,11 @@ function addWeatherLayer(layerType) {
     
     // Add new weather layer
     const config = layerConfigs[layerType];
+    if (!config) {
+        console.error('Unknown layer type:', layerType);
+        return;
+    }
+    
     currentWeatherLayer = L.tileLayer(config.url, {
         attribution: 'Weather data © OpenWeatherMap',
         opacity: 0.6
@@ -180,6 +195,8 @@ function addWeatherLayer(layerType) {
 
 function updateLayerInfo(layerType) {
     const config = layerConfigs[layerType];
+    if (!config) return;
+    
     document.getElementById('current-layer').textContent = config.name;
     document.getElementById('layer-description').textContent = config.description;
     
@@ -206,43 +223,98 @@ function initializeLayerControls() {
     });
 }
 
-// Initialize everything
+function showMapError(message) {
+    const mapContainer = document.getElementById('weather-map');
+    mapContainer.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center h-100 text-center">
+            <div>
+                <i data-feather="alert-circle" class="mb-3" style="width: 48px; height: 48px;"></i>
+                <h5>Weather Map Unavailable</h5>
+                <p class="text-muted">${message}</p>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i data-feather="refresh-cw"></i> Refresh
+                </button>
+            </div>
+        </div>
+    `;
+    feather.replace();
+}
+
+// Initialize map when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing map...');
+    console.log('API Key:', API_KEY ? 'Present' : 'Missing');
+    console.log('Coordinates:', coordinates);
+    console.log('Leaflet available:', typeof L !== 'undefined');
+    
+    // Check if map container exists
+    const mapContainer = document.getElementById('weather-map');
+    if (!mapContainer) {
+        console.error('Map container not found!');
+        return;
+    }
+    
+    // Check if Leaflet is loaded
+    if (typeof L === 'undefined') {
+        console.error('Leaflet library not loaded!');
+        showMapError('Map library failed to load. Please refresh the page.');
+        return;
+    }
+    
     // Check if API key is available
     if (!API_KEY || API_KEY === 'your_api_key_here') {
-        const mapContainer = document.getElementById('weather-map');
-        mapContainer.innerHTML = `
-            <div class="d-flex align-items-center justify-content-center h-100 text-center">
-                <div>
-                    <i data-feather="alert-circle" class="mb-3" style="width: 48px; height: 48px;"></i>
-                    <h5>Weather Map Unavailable</h5>
-                    <p class="text-muted">Weather map requires an API key to display weather overlays.</p>
-                </div>
-            </div>
-        `;
-        feather.replace();
-    } else {
-        // Initialize map with proper error handling
-        try {
-            initializeMap();
-            initializeLayerControls();
-        } catch (error) {
-            console.error('Map initialization failed:', error);
-            const mapContainer = document.getElementById('weather-map');
-            mapContainer.innerHTML = `
-                <div class="d-flex align-items-center justify-content-center h-100 text-center">
-                    <div>
-                        <i data-feather="map-pin" class="mb-3" style="width: 48px; height: 48px;"></i>
-                        <h5>Map Loading Error</h5>
-                        <p class="text-muted">Unable to load the weather map. Please try refreshing the page.</p>
-                        <button class="btn btn-primary" onclick="location.reload()">
-                            <i data-feather="refresh-cw"></i> Refresh
-                        </button>
-                    </div>
-                </div>
-            `;
-            feather.replace();
-        }
+        showMapError('Weather map requires an API key to display weather overlays.');
+        return;
+    }
+    
+    // Check if coordinates are valid
+    if (!coordinates || typeof coordinates.lat !== 'number' || typeof coordinates.lon !== 'number') {
+        console.error('Invalid coordinates:', coordinates);
+        showMapError('Invalid coordinates provided for map initialization.');
+        return;
+    }
+    
+    // Initialize map
+    try {
+        console.log('Starting map initialization...');
+        console.log('Map container dimensions:', mapContainer.offsetWidth, 'x', mapContainer.offsetHeight);
+        
+        // Create the map
+        weatherMap = L.map('weather-map').setView([coordinates.lat, coordinates.lon], 8);
+        console.log('Map created successfully');
+        
+        // Add base map layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(weatherMap);
+        console.log('Base layer added successfully');
+
+        // Add city marker
+        L.marker([coordinates.lat, coordinates.lon])
+            .addTo(weatherMap)
+            .bindPopup(`<b>{{ current_city }}</b>`)
+            .openPopup();
+        console.log('Marker added successfully');
+
+        // Initialize controls
+        initializeLayerControls();
+        
+        // Add default temperature layer
+        addWeatherLayer('temp');
+        
+        // Force map to resize after a short delay
+        setTimeout(function() {
+            if (weatherMap) {
+                weatherMap.invalidateSize();
+                console.log('Map size invalidated');
+            }
+        }, 100);
+        
+        console.log('Map initialization completed successfully');
+    } catch (error) {
+        console.error('Error during map initialization:', error);
+        showMapError('Failed to initialize map: ' + error.message);
     }
 });
 </script>

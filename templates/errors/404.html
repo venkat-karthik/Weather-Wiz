@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - Weather Wiz{% endblock %}
+
+{% block content %}
+<div class="error-container" style="text-align: center; padding: 100px 20px;">
+    <div class="error-card" style="max-width: 500px; margin: 0 auto; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 50px; backdrop-filter: blur(15px); box-shadow: 0 8px 32px var(--shadow);">
+        <div style="font-size: 6rem; color: var(--primary-color); margin-bottom: 20px;">404</div>
+        <h1 style="color: var(--text-primary); margin-bottom: 20px;">Page Not Found</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 30px; line-height: 1.6;">
+            The page you're looking for doesn't exist. It might have been moved, deleted, or you entered the wrong URL.
+        </p>
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('index') }}" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)); color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                <i data-feather="home"></i> Go Home
+            </a>
+            <a href="{{ url_for('search') }}" style="background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); padding: 10px 22px; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                <i data-feather="search"></i> Search Cities
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+if (typeof feather !== 'undefined') {
+    feather.replace();
+}
+</script>
+{% endblock %}

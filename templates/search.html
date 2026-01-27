@@ -44,13 +44,13 @@
                                     <div class="col-8">
                                         <h6 class="mb-1">{{ city }}</h6>
                                         <div class="city-actions">
-                                            <a href="{{ url_for('index', city=city) }}" class="btn btn-sm btn-outline-primary me-2">
+                                            <a href="{{ url_for('city_weather', city=city) }}" class="btn btn-sm btn-outline-primary me-2">
                                                 <i data-feather="eye"></i> View
                                             </a>
                                             <a href="{{ url_for('forecast', city=city) }}" class="btn btn-sm btn-outline-secondary me-2">
                                                 <i data-feather="calendar"></i> Forecast
                                             </a>
-                                            <a href="{{ url_for('weather_map', city=city) }}" class="btn btn-sm btn-outline-info">
+                                            <a href="{{ url_for('map') }}" class="btn btn-sm btn-outline-info">
                                                 <i data-feather="map"></i> Map
                                             </a>
                                         </div>

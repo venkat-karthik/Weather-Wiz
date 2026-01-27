@@ -386,6 +386,270 @@ class WeatherApp {
     }
 }
 
+// Outfit Suggestions Functions
+function showOutfitSuggestions() {
+    // Get current weather data
+    const weatherData = getCurrentWeatherData();
+    
+    if (!weatherData) {
+        showNotification('Weather data not available', 'warning');
+        return;
+    }
+    
+    // Generate outfit suggestion
+    const suggestion = getOutfitSuggestion(weatherData);
+    
+    if (!suggestion) {
+        showNotification('Unable to generate outfit suggestion', 'error');
+        return;
+    }
+    
+    // Create and show outfit suggestion modal
+    showOutfitSuggestionModal(suggestion);
+}
+
+function getCurrentWeatherData() {
+    // Try to extract weather data from the page
+    const tempElement = document.querySelector('.current-temp, .current-temp-large');
+    const conditionElement = document.querySelector('.weather-condition, .weather-condition-large');
+    const humidityElement = document.querySelector('[data-humidity]');
+    const windElement = document.querySelector('[data-wind]');
+    
+    if (!tempElement || !conditionElement) {
+        return null;
+    }
+    
+    // Extract temperature (remove °C/°F and convert to number)
+    const tempText = tempElement.textContent.replace(/[°CF]/g, '').trim();
+    const temperature = parseFloat(tempText);
+    
+    // Extract condition
+    const condition = conditionElement.textContent.trim();
+    
+    // Extract additional data if available
+    const humidity = humidityElement ? parseFloat(humidityElement.dataset.humidity) : 50;
+    const windSpeed = windElement ? parseFloat(windElement.dataset.wind) : 10;
+    
+    return {
+        temperature: temperature,
+        description: condition,
+        humidity: humidity,
+        windSpeed: windSpeed
+    };
+}
+
+function showOutfitSuggestionModal(suggestion) {
+    // Create modal HTML
+    const modalHTML = `
+        <div class="outfit-preferences-modal" id="outfit-suggestion-modal">
+            <div class="outfit-preferences-content">
+                <div class="outfit-preferences-header">
+                    <h3 class="outfit-preferences-title">AI Outfit Suggestion</h3>
+                    <button class="outfit-preferences-close" onclick="closeOutfitSuggestion()">&times;</button>
+                </div>
+                
+                <div class="outfit-suggestions-card">
+                    <div class="outfit-header">
+                        <h4 class="outfit-title">Today's Outfit</h4>
+                        <i data-feather="shirt" class="outfit-icon"></i>
+                    </div>
+                    
+                    <div class="outfit-summary">
+                        ${suggestion.summary}
+                    </div>
+                    
+                    <div class="outfit-details">
+                        <div class="outfit-item">
+                            <i data-feather="shirt" class="outfit-item-icon"></i>
+                            <span class="outfit-item-label">Top:</span>
+                            <span class="outfit-item-value">${suggestion.details.top}</span>
+                        </div>
+                        <div class="outfit-item">
+                            <i data-feather="shirt" class="outfit-item-icon"></i>
+                            <span class="outfit-item-label">Bottom:</span>
+                            <span class="outfit-item-value">${suggestion.details.bottom}</span>
+                        </div>
+                        <div class="outfit-item">
+                            <i data-feather="shoe" class="outfit-item-icon"></i>
+                            <span class="outfit-item-label">Footwear:</span>
+                            <span class="outfit-item-value">${suggestion.details.footwear}</span>
+                        </div>
+                        ${suggestion.details.accessories ? `
+                        <div class="outfit-item">
+                            <i data-feather="star" class="outfit-item-icon"></i>
+                            <span class="outfit-item-label">Accessories:</span>
+                            <span class="outfit-item-value">${suggestion.details.accessories}</span>
+                        </div>
+                        ` : ''}
+                        ${suggestion.details.layers ? `
+                        <div class="outfit-item">
+                            <i data-feather="layers" class="outfit-item-icon"></i>
+                            <span class="outfit-item-label">Layers:</span>
+                            <span class="outfit-item-value">${suggestion.details.layers}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="outfit-reasoning">
+                        <strong>Why this outfit?</strong><br>
+                        ${suggestion.reasoning}
+                    </div>
+                    
+                    <div class="outfit-tips">
+                        <h6>Additional Tips:</h6>
+                        <ul>
+                            ${suggestion.tips.map(tip => `<li>${tip}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="outfit-actions">
+                        <button class="outfit-btn" onclick="regenerateOutfitSuggestion()">
+                            <i data-feather="refresh-cw"></i> New Suggestion
+                        </button>
+                        <button class="outfit-btn outfit-btn-primary" onclick="showOutfitPreferences()">
+                            <i data-feather="settings"></i> Preferences
+                        </button>
+                        <button class="outfit-btn" onclick="shareOutfitSuggestion()">
+                            <i data-feather="share-2"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Show modal
+    const modal = document.getElementById('outfit-suggestion-modal');
+    modal.style.display = 'block';
+    
+    // Initialize Feather icons in modal
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+    
+    // Add click outside to close
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeOutfitSuggestion();
+        }
+    });
+}
+
+function closeOutfitSuggestion() {
+    const modal = document.getElementById('outfit-suggestion-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function regenerateOutfitSuggestion() {
+    closeOutfitSuggestion();
+    setTimeout(() => {
+        showOutfitSuggestions();
+    }, 100);
+}
+
+function showOutfitPreferences() {
+    const modal = document.getElementById('outfit-preferences-modal');
+    if (modal) {
+        modal.style.display = 'block';
+        
+        // Load current preferences
+        loadOutfitPreferences();
+        
+        // Add click outside to close
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeOutfitPreferences();
+            }
+        });
+    }
+}
+
+function closeOutfitPreferences() {
+    const modal = document.getElementById('outfit-preferences-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function loadOutfitPreferences() {
+    const preferences = outfitSuggestions.getPreferences();
+    
+    // Set form values
+    document.getElementById('style-preference').value = preferences.style;
+    document.getElementById('comfort-preference').value = preferences.comfort;
+    document.getElementById('layers-preference').value = preferences.layers;
+    document.getElementById('footwear-preference').value = preferences.footwear;
+    document.getElementById('accessories-preference').checked = preferences.accessories;
+    
+    // Set color preferences
+    const colorOptions = document.querySelectorAll('.color-option');
+    colorOptions.forEach(option => {
+        const color = option.dataset.color;
+        if (preferences.colors.includes(color)) {
+            option.classList.add('selected');
+        } else {
+            option.classList.remove('selected');
+        }
+    });
+}
+
+function saveOutfitPreferences() {
+    const preferences = {
+        style: document.getElementById('style-preference').value,
+        comfort: document.getElementById('comfort-preference').value,
+        layers: document.getElementById('layers-preference').value,
+        footwear: document.getElementById('footwear-preference').value,
+        accessories: document.getElementById('accessories-preference').checked,
+        colors: Array.from(document.querySelectorAll('.color-option.selected')).map(option => option.dataset.color)
+    };
+    
+    updateOutfitPreferences(preferences);
+    closeOutfitPreferences();
+    showNotification('Outfit preferences saved!', 'success');
+}
+
+function shareOutfitSuggestion() {
+    const weatherData = getCurrentWeatherData();
+    const suggestion = getOutfitSuggestion(weatherData);
+    
+    if (navigator.share && suggestion) {
+        navigator.share({
+            title: 'My Weather Outfit Suggestion',
+            text: suggestion.summary,
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(suggestion.summary).then(() => {
+            showNotification('Outfit suggestion copied to clipboard!', 'success');
+        });
+    }
+}
+
+// Initialize outfit preferences form
+document.addEventListener('DOMContentLoaded', function() {
+    const preferencesForm = document.getElementById('outfit-preferences-form');
+    if (preferencesForm) {
+        preferencesForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveOutfitPreferences();
+        });
+    }
+    
+    // Initialize color preference selection
+    const colorOptions = document.querySelectorAll('.color-option');
+    colorOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            this.classList.toggle('selected');
+        });
+    });
+});
+
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     window.weatherApp = new WeatherApp();

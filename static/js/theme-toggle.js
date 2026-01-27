@@ -1,3 +1,24 @@
+// Global function to toggle theme (for onclick handlers)
+function toggleTheme() {
+    if (window.themeManager) {
+        window.themeManager.toggleTheme();
+    } else {
+        // Fallback if theme manager isn't initialized yet
+        const currentTheme = localStorage.getItem('weather-app-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        // Apply theme directly
+        document.body.className = document.body.className.replace(/theme-\w+/, `theme-${newTheme}`);
+        localStorage.setItem('weather-app-theme', newTheme);
+        
+        // Update button text
+        const themeToggle = document.querySelector('.theme-toggle');
+        if (themeToggle) {
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+    }
+}
+
 // Theme Toggle Functionality
 class ThemeManager {
     constructor() {
@@ -45,11 +66,11 @@ class ThemeManager {
         // Update theme color meta tag for mobile browsers
         const themeColorMeta = document.querySelector('meta[name="theme-color"]');
         if (themeColorMeta) {
-            themeColorMeta.content = theme === 'dark' ? '#1a1a2e' : '#87CEEB';
+            themeColorMeta.content = theme === 'dark' ? '#0F1419' : '#64B5F6';
         } else {
             const meta = document.createElement('meta');
             meta.name = 'theme-color';
-            meta.content = theme === 'dark' ? '#1a1a2e' : '#87CEEB';
+            meta.content = theme === 'dark' ? '#0F1419' : '#64B5F6';
             document.getElementsByTagName('head')[0].appendChild(meta);
         }
 
@@ -73,6 +94,12 @@ class ThemeManager {
                 feather.replace();
             }
         }
+        
+        // Update button text for simple theme toggle buttons
+        const themeToggle = document.querySelector('.theme-toggle');
+        if (themeToggle) {
+            themeToggle.textContent = this.currentTheme === 'dark' ? '☀️' : '🌙';
+        }
     }
 
     updateBackgroundGradient(theme) {
@@ -80,11 +107,11 @@ class ThemeManager {
         const root = document.documentElement;
         
         if (theme === 'dark') {
-            root.style.setProperty('--bg-gradient-start', '#1a1a2e');
-            root.style.setProperty('--bg-gradient-end', '#16213e');
+            root.style.setProperty('--bg-gradient-start', '#0F1419');
+            root.style.setProperty('--bg-gradient-end', '#1A2332');
         } else {
-            root.style.setProperty('--bg-gradient-start', '#87CEEB');
-            root.style.setProperty('--bg-gradient-end', '#E0F6FF');
+            root.style.setProperty('--bg-gradient-start', '#64B5F6');
+            root.style.setProperty('--bg-gradient-end', '#E1F5FE');
         }
     }
 

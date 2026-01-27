@@ -1,4 +1,9 @@
+from dotenv import load_dotenv
 import os
+
+# Load environment variables
+load_dotenv()
+
 import requests
 import logging
 from datetime import datetime, timedelta
@@ -8,13 +13,21 @@ class WeatherService:
     """Service class for interacting with OpenWeatherMap API"""
     
     def __init__(self):
-        self.api_key = os.environ.get('OPENWEATHER_API_KEY', 'your_api_key_here')
+        self.api_key = os.environ.get('OPENWEATHER_API_KEY')
+        if not self.api_key:
+            logging.error("OpenWeather API key not found in environment variables")
+            raise ValueError("OpenWeather API key is required")
         self.base_url = 'https://api.openweathermap.org/data/2.5'
         self.geocoding_url = 'https://api.openweathermap.org/geo/1.0'
         
     def get_current_weather(self, city: str) -> Optional[Dict]:
         """Get current weather for a city"""
         try:
+            # Validate input
+            if not city:
+                logging.error("City parameter is required")
+                return None
+
             url = f"{self.base_url}/weather"
             params = {
                 'q': city,
@@ -22,8 +35,14 @@ class WeatherService:
                 'units': 'metric'
             }
             
+            logging.info(f"Fetching weather data for {city}")
             response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
+            
+            # Log the response status and any error messages
+            if response.status_code != 200:
+                logging.error(f"API request failed with status {response.status_code}: {response.text}")
+                return None
+                
             data = response.json()
             
             # Parse and format the weather data

@@ -1,0 +1,782 @@
+{% extends "base.html" %}
+
+{% block title %}Weather Outfit Marketplace - {{ current_city if current_city else 'Weather App' }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .outfit-marketplace {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .marketplace-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 30px;
+        background: var(--glass-bg);
+        border-radius: 20px;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid var(--glass-border);
+    }
+    
+    .marketplace-title {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, var(--text-primary), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .marketplace-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+    }
+    
+    .weather-summary {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+    
+    .weather-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+    }
+    
+    .outfit-controls {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 30px 0;
+        flex-wrap: wrap;
+    }
+    
+    .style-btn {
+        padding: 12px 24px;
+        border: 2px solid var(--primary-color);
+        border-radius: 25px;
+        background: transparent;
+        color: var(--primary-color);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    
+    .style-btn:hover, .style-btn.active {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+    
+    .outfit-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+        margin: 40px 0;
+    }
+    
+    .product-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        box-shadow: 0 8px 32px var(--shadow);
+    }
+    
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 48px var(--shadow);
+        border-color: var(--primary-color);
+    }
+    
+    .product-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .product-content {
+        padding: 25px;
+    }
+    
+    .product-category {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+    
+    .product-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+    
+    .product-brand {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 12px;
+    }
+    
+    .product-description {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin-bottom: 15px;
+    }
+    
+    .product-features {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 20px;
+    }
+    
+    .feature-tag {
+        padding: 4px 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        font-size: 0.7rem;
+        color: var(--text-primary);
+        border: 1px solid var(--glass-border);
+    }
+    
+    .product-rating {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .stars {
+        display: flex;
+        gap: 2px;
+    }
+    
+    .star {
+        color: #FFD700;
+        font-size: 0.9rem;
+    }
+    
+    .rating-text {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+    
+    .product-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--glass-border);
+    }
+    
+    .product-price {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    
+    .buy-btn {
+        padding: 10px 20px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: white;
+        border: none;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .buy-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .outfit-summary {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 30px;
+        margin: 40px 0;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+    }
+    
+    .summary-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .summary-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    
+    .total-price {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    
+    .outfit-reasoning {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+    
+    .outfit-tips {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+    
+    .tips-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+    }
+    
+    .tips-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .tips-list li {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        padding-left: 20px;
+        position: relative;
+    }
+    
+    .tips-list li::before {
+        content: '💡';
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .action-btn {
+        padding: 12px 24px;
+        border: 2px solid var(--glass-border);
+        border-radius: 25px;
+        background: var(--glass-bg);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .action-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        color: var(--text-primary);
+        text-decoration: none;
+    }
+    
+    .action-btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        border-color: var(--primary-color);
+        color: white;
+    }
+    
+    .action-btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
+        color: white;
+    }
+    
+    .preferences-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+    
+    .preferences-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 20px 60px var(--shadow);
+    }
+    
+    .loading-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-secondary);
+    }
+    
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--glass-border);
+        border-top: 3px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+        .marketplace-title {
+            font-size: 2.2rem;
+        }
+        
+        .outfit-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .product-card {
+            margin: 0 10px;
+        }
+        
+        .summary-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .action-btn {
+            width: 100%;
+            max-width: 300px;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="outfit-marketplace">
+    <div class="marketplace-header">
+        <h1 class="marketplace-title">Weather Outfit Marketplace</h1>
+        <p class="marketplace-subtitle">Curated fashion recommendations based on real-time weather data</p>
+        
+        {% if current_weather %}
+        <div class="weather-summary">
+            <div class="weather-item">
+                <i data-feather="map-pin"></i>
+                <span>{{ current_weather.location }}</span>
+            </div>
+            <div class="weather-item">
+                <i data-feather="thermometer"></i>
+                <span>{{ current_weather.temperature }}°C</span>
+            </div>
+            <div class="weather-item">
+                <i data-feather="cloud"></i>
+                <span>{{ current_weather.description }}</span>
+            </div>
+            <div class="weather-item">
+                <i data-feather="droplet"></i>
+                <span>{{ current_weather.humidity }}%</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="outfit-controls">
+        <button class="style-btn active" onclick="setStyle('casual')" data-style="casual">Casual</button>
+        <button class="style-btn" onclick="setStyle('formal')" data-style="formal">Formal</button>
+        <button class="style-btn" onclick="setStyle('sporty')" data-style="sporty">Sporty</button>
+        <button class="style-btn" onclick="setStyle('trendy')" data-style="trendy">Trendy</button>
+    </div>
+    
+    <div id="loading-state" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Curating your perfect weather outfit...</p>
+    </div>
+    
+    <div id="outfit-grid" class="outfit-grid" style="display: none;">
+        <!-- Products will be populated by JavaScript -->
+    </div>
+    
+    <div id="outfit-summary" class="outfit-summary" style="display: none;">
+        <!-- Summary will be populated by JavaScript -->
+    </div>
+    
+    <div class="action-buttons">
+        <button class="action-btn action-btn-primary" onclick="buyCompleteOutfit()">
+            <i data-feather="shopping-cart"></i>
+            Buy Complete Outfit
+        </button>
+        <button class="action-btn" onclick="saveOutfit()">
+            <i data-feather="heart"></i>
+            Save Outfit
+        </button>
+        <button class="action-btn" onclick="shareOutfit()">
+            <i data-feather="share-2"></i>
+            Share Outfit
+        </button>
+        <button class="action-btn" onclick="showPreferences()">
+            <i data-feather="settings"></i>
+            Preferences
+        </button>
+        <button class="action-btn" onclick="refreshOutfit()">
+            <i data-feather="refresh-cw"></i>
+            New Suggestions
+        </button>
+    </div>
+</div>
+
+<!-- Preferences Modal -->
+<div id="preferences-modal" class="preferences-modal">
+    <div class="preferences-content">
+        <div class="preferences-header">
+            <h3>Outfit Preferences</h3>
+            <button onclick="closePreferences()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-primary);">&times;</button>
+        </div>
+        
+        <form id="preferences-form">
+            <div class="preference-group">
+                <label>Budget Range</label>
+                <select id="budget-preference">
+                    <option value="low">Budget-Friendly (Under $50 per item)</option>
+                    <option value="medium" selected>Mid-Range ($50-$150 per item)</option>
+                    <option value="high">Premium ($150+ per item)</option>
+                </select>
+            </div>
+            
+            <div class="preference-group">
+                <label>Comfort Level</label>
+                <select id="comfort-preference">
+                    <option value="low">Style First</option>
+                    <option value="medium" selected>Balanced</option>
+                    <option value="high">Comfort First</option>
+                </select>
+            </div>
+            
+            <div class="preference-group">
+                <label>
+                    <input type="checkbox" id="accessories-preference" checked>
+                    Include accessories in suggestions
+                </label>
+            </div>
+            
+            <div class="preference-actions">
+                <button type="button" onclick="closePreferences()">Cancel</button>
+                <button type="submit">Save Preferences</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const weatherData = {{ current_weather|tojson if current_weather else 'null' }};
+    let currentStyle = 'casual';
+    let currentOutfit = null;
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (weatherData) {
+            generateOutfit();
+        } else {
+            document.getElementById('loading-state').innerHTML = '<p>Weather data not available. Please try refreshing the page.</p>';
+        }
+    });
+    
+    function setStyle(style) {
+        currentStyle = style;
+        
+        // Update button states
+        document.querySelectorAll('.style-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-style="${style}"]`).classList.add('active');
+        
+        generateOutfit();
+    }
+    
+    function generateOutfit() {
+        if (!weatherData) return;
+        
+        // Show loading state
+        document.getElementById('loading-state').style.display = 'block';
+        document.getElementById('outfit-grid').style.display = 'none';
+        document.getElementById('outfit-summary').style.display = 'none';
+        
+        // Simulate API call delay
+        setTimeout(() => {
+            const suggestion = outfitSuggestions.generateSuggestion(weatherData);
+            const formatted = outfitSuggestions.formatSuggestion(suggestion);
+            
+            currentOutfit = formatted;
+            displayOutfit(formatted);
+            
+            // Hide loading state
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('outfit-grid').style.display = 'grid';
+            document.getElementById('outfit-summary').style.display = 'block';
+        }, 1000);
+    }
+    
+    function displayOutfit(outfit) {
+        const grid = document.getElementById('outfit-grid');
+        grid.innerHTML = '';
+        
+        // Display each product
+        const products = [
+            { ...outfit.items.top, category: 'Top' },
+            { ...outfit.items.bottom, category: 'Bottom' },
+            { ...outfit.items.footwear, category: 'Footwear' },
+            ...outfit.items.accessories.map(acc => ({ ...acc, category: 'Accessory' }))
+        ];
+        
+        products.forEach(product => {
+            if (product && product.name) {
+                const productCard = createProductCard(product);
+                grid.appendChild(productCard);
+            }
+        });
+        
+        // Display summary
+        displaySummary(outfit);
+    }
+    
+    function createProductCard(product) {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        
+        const stars = generateStars(product.rating);
+        const features = product.features ? product.features.map(f => `<span class="feature-tag">${f}</span>`).join('') : '';
+        
+        card.innerHTML = `
+            <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300?text=${encodeURIComponent(product.name)}'">
+            <div class="product-content">
+                <div class="product-category">${product.category}</div>
+                <h3 class="product-name">${product.name}</h3>
+                <div class="product-brand">${product.brand}</div>
+                <p class="product-description">${product.description}</p>
+                <div class="product-features">${features}</div>
+                <div class="product-rating">
+                    <div class="stars">${stars}</div>
+                    <span class="rating-text">${product.rating}/5</span>
+                </div>
+                <div class="product-footer">
+                    <div class="product-price">${product.price}</div>
+                    <a href="${product.affiliateUrl || '#'}" class="buy-btn" target="_blank" rel="noopener">
+                        <i data-feather="shopping-cart"></i>
+                        Buy Now
+                    </a>
+                </div>
+            </div>
+        `;
+        
+        return card;
+    }
+    
+    function generateStars(rating) {
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 !== 0;
+        let stars = '';
+        
+        for (let i = 0; i < fullStars; i++) {
+            stars += '<span class="star">★</span>';
+        }
+        
+        if (hasHalfStar) {
+            stars += '<span class="star">☆</span>';
+        }
+        
+        const emptyStars = 5 - Math.ceil(rating);
+        for (let i = 0; i < emptyStars; i++) {
+            stars += '<span class="star" style="color: #ddd;">☆</span>';
+        }
+        
+        return stars;
+    }
+    
+    function displaySummary(outfit) {
+        const summary = document.getElementById('outfit-summary');
+        
+        summary.innerHTML = `
+            <div class="summary-header">
+                <h3 class="summary-title">Complete Outfit</h3>
+                <div class="total-price">$${outfit.totalPrice}</div>
+            </div>
+            <div class="outfit-reasoning">${outfit.reasoning}</div>
+            <div class="outfit-tips">
+                <div class="tips-title">Style Tips</div>
+                <ul class="tips-list">
+                    ${outfit.tips.map(tip => `<li>${tip}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    function buyCompleteOutfit() {
+        if (!currentOutfit) {
+            alert('No outfit selected!');
+            return;
+        }
+        
+        // Open all affiliate links in new tabs
+        const products = [
+            currentOutfit.items.top,
+            currentOutfit.items.bottom,
+            currentOutfit.items.footwear,
+            ...currentOutfit.items.accessories
+        ];
+        
+        products.forEach(product => {
+            if (product && product.affiliateUrl) {
+                window.open(product.affiliateUrl, '_blank');
+            }
+        });
+        
+        // Track the purchase intent
+        trackEvent('complete_outfit_purchase', {
+            style: currentStyle,
+            total_price: currentOutfit.totalPrice,
+            temperature: weatherData.temperature
+        });
+    }
+    
+    function saveOutfit() {
+        if (!currentOutfit) {
+            alert('No outfit to save!');
+            return;
+        }
+        
+        const savedOutfits = JSON.parse(localStorage.getItem('savedOutfits') || '[]');
+        const outfitData = {
+            ...currentOutfit,
+            timestamp: new Date().toISOString(),
+            city: weatherData.location,
+            style: currentStyle
+        };
+        
+        savedOutfits.push(outfitData);
+        localStorage.setItem('savedOutfits', JSON.stringify(savedOutfits));
+        
+        alert('Outfit saved successfully!');
+    }
+    
+    function shareOutfit() {
+        if (!currentOutfit) {
+            alert('No outfit to share!');
+            return;
+        }
+        
+        const shareText = `Check out this weather-perfect outfit for ${weatherData.location} (${weatherData.temperature}°C)! Total: $${currentOutfit.totalPrice}`;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'Weather Outfit Suggestion',
+                text: shareText,
+                url: window.location.href
+            });
+        } else {
+            navigator.clipboard.writeText(shareText + ' - ' + window.location.href).then(() => {
+                alert('Outfit details copied to clipboard!');
+            });
+        }
+    }
+    
+    function showPreferences() {
+        document.getElementById('preferences-modal').style.display = 'block';
+    }
+    
+    function closePreferences() {
+        document.getElementById('preferences-modal').style.display = 'none';
+    }
+    
+    function refreshOutfit() {
+        generateOutfit();
+    }
+    
+    function trackEvent(eventName, data) {
+        // Add your analytics tracking here
+        console.log('Event:', eventName, data);
+    }
+    
+    // Initialize feather icons after content loads
+    setTimeout(() => {
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    }, 100);
+</script>
+{% endblock %}

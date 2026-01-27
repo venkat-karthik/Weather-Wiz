@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy - Weather Wiz{% endblock %}
+
+{% block content %}
+<div class="legal-container" style="max-width: 800px; margin: 30px auto; padding: 0 20px;">
+    <div class="legal-card" style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 40px; backdrop-filter: blur(15px); box-shadow: 0 8px 32px var(--shadow);">
+        <h1 style="color: var(--text-primary); margin-bottom: 30px;">Privacy Policy</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;"><strong>Last updated:</strong> {{ now().strftime('%B %d, %Y') }}</p>
+        
+        <div style="color: var(--text-secondary); line-height: 1.6;">
+            <h2 style="color: var(--text-primary); margin-top: 30px; margin-bottom: 15px;">Information We Collect</h2>
+            <p>We collect information you provide directly to us, such as when you create an account, save cities, or interact with our affiliate partners.</p>
+            
+            <h3 style="color: var(--text-primary); margin-top: 25px; margin-bottom: 10px;">Personal Information</h3>
+            <ul>
+                <li>Email address and username</li>
+                <li>Name (optional)</li>
+                <li>Weather preferences and saved cities</li>
+                <li>Outfit preferences and saved outfits</li>
+            </ul>
+            
+            <h3 style="color: var(--text-primary); margin-top: 25px; margin-bottom: 10px;">Usage Information</h3>
+            <ul>
+                <li>Pages visited and features used</li>
+                <li>Weather searches and location data</li>
+                <li>Affiliate link clicks and purchases</li>
+                <li>Device and browser information</li>
+            </ul>
+            
+            <h2 style="color: var(--text-primary); margin-top: 30px; margin-bottom: 15px;">How We Use Your Information</h2>
+            <ul>
+                <li>Provide personalized weather and outfit recommendations</li>
+                <li>Improve our services and user experience</li>
+                <li>Send important account and service updates</li>
+                <li>Process affiliate transactions and earn commissions</li>
+                <li>Analyze usage patterns and optimize performance</li>
+            </ul>
+            
+            <h2 style="color: var(--text-primary); margin-top: 30px; margin-bottom: 15px;">Information Sharing</h2>
+            <p>We do not sell, trade, or rent your personal information to third parties. We may share information in the following circumstances:</p>
+            <ul>
+                <li><strong>Affiliate Partners:</strong> When you click affiliate links, we may share anonymous usage data</li>
+                <li><strong>Service Providers:</strong> With trusted partners who help us operate our service</li>
+                <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
+            </ul>
+            
+            <h2 style="color: var(--text-primary); margin-top: 30px; margin-bottom: 15px;">Amazon Affiliate Program</h2>
+            <p>Weather Wiz is a participant in the Amazon Services LLC Associates Program, an affiliate advertising program designed to provide a means for sites to earn advertising fees by advertising and linking to Amazon.com. When you purchase products through our affiliate links, we may earn a commission at no additional cost to you.</p>
+            
+            <h2 style="color: var(--text-primary); margin-top: 30px; margin-bottom: 15px;">Cookies and Tracking</h2>
+            <p>We use cookies and similar technologies to:</p>
+            <ul>
+                <li>Remember your preferences and settings</li>
+                <li>Analyze site usage and improve performance</li>
+                <li>Provide personalized content and recommendations</li>
+                <li>Track affiliate link performance</li>
+            </ul>
+            
+            <h2 style="color: var(--text-primary); margin-top: 30px; margin-bottom: 15px;">Data Security</h2>
+            <p>We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the internet is 100% secure.</p>
+            
+            <h2 style="color: var(--text-primary); margin-top: 30px; margin-bottom: 15px;">Your Rights</h2>
+            <p>You have the right to:</p>
+            <ul>
+                <li>Access and update your personal information</li>
+                <li>Delete your account and associated data</li>
+                <li>Opt out of marketing communications</li>
+                <li>Request a copy of your data</li>
+            </ul>
+            
+            <h2 style="color: var(--text-primary); margin-top: 30px; margin-bottom: 15px;">Contact Us</h2>
+            <p>If you have any questions about this Privacy Policy, please contact us at:</p>
+            <p><strong>Email:</strong> privacy@weatherwiz.com</p>
+            
+            <h2 style="color: var(--text-primary); margin-top: 30px; margin-bottom: 15px;">Changes to This Policy</h2>
+            <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.</p>
+        </div>
+        
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="{{ url_for('index') }}" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)); color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600;">
+                Back to Weather Wiz
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

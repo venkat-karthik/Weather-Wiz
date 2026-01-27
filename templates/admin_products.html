@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Products Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .product-form {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(15px);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        }
+        
+        .products-list {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(15px);
+        }
+        
+        .product-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 15px;
+        }
+        
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .product-info {
+            flex: 1;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        
+        .product-brand {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .product-price {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .instructions h3 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+        
+        .instructions ol {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .instructions code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row,
+            .form-row-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-item {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Affiliate Products Admin</h1>
+            <p>Manage your Amazon affiliate product database</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to Add Amazon Affiliate Products</h3>
+            <ol>
+                <li>Go to the Amazon product page you want to add</li>
+                <li>Copy the ASIN from the URL (e.g., B08N5WRWNW)</li>
+                <li>Get the product image URL by right-clicking the main product image</li>
+                <li>Fill out the form below with product details</li>
+                <li>Make sure your affiliate tag is set in <code>affiliate_products.py</code></li>
+                <li>The affiliate URL will be generated automatically using your ASIN</li>
+            </ol>
+        </div>
+        
+        <div class="product-form">
+            <h2>Add New Product</h2>
+            <form id="product-form">
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label for="style">Style Category</label>
+                        <select id="style" required>
+                            <option value="casual">Casual</option>
+                            <option value="formal">Formal</option>
+                            <option value="sporty">Sporty</option>
+                            <option value="trendy">Trendy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="temperature">Temperature Range</label>
+                        <select id="temperature" required>
+                            <option value="hot">Hot (25°C+)</option>
+                            <option value="warm">Warm (18-24°C)</option>
+                            <option value="mild">Mild (10-17°C)</option>
+                            <option value="cool">Cool (5-9°C)</option>
+                            <option value="cold">Cold (0-4°C)</option>
+                            <option value="freezing">Freezing (Below 0°C)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Product Category</label>
+                        <select id="category" required>
+                            <option value="tops">Tops</option>
+                            <option value="bottoms">Bottoms</option>
+                            <option value="footwear">Footwear</option>
+                            <option value="accessories">Accessories</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Product Name</label>
+                        <input type="text" id="name" required placeholder="e.g., Cotton T-Shirt">
+                    </div>
+                    <div class="form-group">
+                        <label for="brand">Brand</label>
+                        <input type="text" id="brand" required placeholder="e.g., Nike">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="price">Price</label>
+                        <input type="text" id="price" required placeholder="e.g., $29.99">
+                    </div>
+                    <div class="form-group">
+                        <label for="rating">Rating (1-5)</label>
+                        <input type="number" id="rating" min="1" max="5" step="0.1" required placeholder="4.5">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="asin">Amazon ASIN</label>
+                        <input type="text" id="asin" required placeholder="e.g., B08N5WRWNW">
+                    </div>
+                    <div class="form-group">
+                        <label for="image">Product Image URL</label>
+                        <input type="url" id="image" required placeholder="https://m.media-amazon.com/images/I/...">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" required placeholder="Brief description of the product"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="features">Features (comma-separated)</label>
+                    <input type="text" id="features" required placeholder="100% Cotton, Machine Washable, Breathable">
+                </div>
+                
+                <button type="submit" class="btn-primary">Add Product</button>
+            </form>
+        </div>
+        
+        <div class="products-list">
+            <h2>Current Products</h2>
+            <div id="products-container">
+                <p>Products will be loaded here...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('product-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                style: document.getElementById('style').value,
+                temperature: document.getElementById('temperature').value,
+                category: document.getElementById('category').value,
+                name: document.getElementById('name').value,
+                brand: document.getElementById('brand').value,
+                price: document.getElementById('price').value,
+                rating: parseFloat(document.getElementById('rating').value),
+                amazon_asin: document.getElementById('asin').value,
+                image: document.getElementById('image').value,
+                description: document.getElementById('description').value,
+                features: document.getElementById('features').value.split(',').map(f => f.trim())
+            };
+            
+            // Here you would send the data to your server
+            console.log('Product data:', formData);
+            
+            // Generate the code to add to affiliate_products.py
+            const productCode = generateProductCode(formData);
+            
+            alert('Product data ready! Copy this code to your affiliate_products.py file:\n\n' + productCode);
+            
+            // Reset form
+            this.reset();
+        });
+        
+        function generateProductCode(data) {
+            return `add_product('${data.style}', '${data.temperature}', '${data.category}', {
+    "name": "${data.name}",
+    "brand": "${data.brand}",
+    "price": "${data.price}",
+    "amazon_asin": "${data.amazon_asin}",
+    "image": "${data.image}",
+    "rating": ${data.rating},
+    "description": "${data.description}",
+    "features": ${JSON.stringify(data.features)}
+})`;
+        }
+        
+        // Load existing products (you would implement this to read from your database)
+        function loadProducts() {
+            // This would fetch products from your server
+            document.getElementById('products-container').innerHTML = '<p>Connect this to your affiliate_products.py database to display existing products.</p>';
+        }
+        
+        loadProducts();
+    </script>
+</body>
+</html>

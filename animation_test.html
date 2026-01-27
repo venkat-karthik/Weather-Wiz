@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Animation Test</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <style>
+        .animation-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            max-width: 300px;
+        }
+        
+        .animation-controls h3 {
+            margin-top: 0;
+            color: #fff;
+        }
+        
+        .animation-controls button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .animation-controls button:hover {
+            background: #0056b3;
+        }
+        
+        .animation-controls button.active {
+            background: #28a745;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+        }
+        
+        .theme-toggle button {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        
+        .theme-toggle button:hover {
+            background: #545b62;
+        }
+        
+        .info-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            max-width: 400px;
+        }
+        
+        .info-panel h4 {
+            margin-top: 0;
+            color: #fff;
+        }
+        
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="theme-light">
+    <!-- Weather Animation Container -->
+    <div id="weather-animation"></div>
+    
+    <!-- Animation Controls -->
+    <div class="animation-controls">
+        <h3>Weather Animations</h3>
+        <button onclick="testAnimation('rain')">Rain</button>
+        <button onclick="testAnimation('drizzle')">Drizzle</button>
+        <button onclick="testAnimation('snow')">Snow</button>
+        <button onclick="testAnimation('storm')">Storm</button>
+        <button onclick="testAnimation('clouds')">Clouds</button>
+        <button onclick="testAnimation('sun')">Sun</button>
+        <button onclick="testAnimation('stars')">Stars</button>
+        <button onclick="testAnimation('fog')">Fog</button>
+        <button onclick="testAnimation('haze')">Haze</button>
+        <button onclick="testAnimation('dust')">Dust</button>
+        <button onclick="testAnimation('smoke')">Smoke</button>
+        <button onclick="testAnimation('ash')">Ash</button>
+        <button onclick="testAnimation('wind')">Wind</button>
+        <button onclick="testAnimation('tornado')">Tornado</button>
+        <button onclick="clearAnimation()">Clear</button>
+    </div>
+    
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button onclick="toggleTheme('light')">Light</button>
+        <button onclick="toggleTheme('dark')">Dark</button>
+    </div>
+    
+    <!-- Info Panel -->
+    <div class="info-panel">
+        <h4>Weather Animation Features</h4>
+        <p><strong>Rain:</strong> 200+ raindrops with varying sizes and speeds</p>
+        <p><strong>Snow:</strong> 100+ snowflakes with rotation and glow effects</p>
+        <p><strong>Storm:</strong> Rain + lightning + dark clouds</p>
+        <p><strong>Clouds:</strong> Multi-layered cloud system with realistic movement</p>
+        <p><strong>Sun:</strong> Pulsing sun with rays and glow particles</p>
+        <p><strong>Stars:</strong> 150+ twinkling stars with varying brightness</p>
+        <p><strong>Responsive:</strong> Adapts to screen size and theme</p>
+    </div>
+
+    <script src="static/js/weather-animations.js"></script>
+    <script>
+        let currentAnimation = null;
+        let weatherAnimations = null;
+        
+        // Initialize weather animations
+        document.addEventListener('DOMContentLoaded', function() {
+            weatherAnimations = new WeatherAnimations();
+            console.log('Weather animations initialized');
+        });
+        
+        // Test animation function
+        function testAnimation(type) {
+            if (weatherAnimations) {
+                // Clear previous animation
+                clearAnimation();
+                
+                // Start new animation
+                weatherAnimations.startAnimation(type);
+                currentAnimation = type;
+                
+                // Update button states
+                updateButtonStates(type);
+                
+                console.log(`Testing ${type} animation`);
+            }
+        }
+        
+        // Clear animation function
+        function clearAnimation() {
+            if (weatherAnimations) {
+                weatherAnimations.clearAnimations();
+                currentAnimation = null;
+                updateButtonStates(null);
+                console.log('Animation cleared');
+            }
+        }
+        
+        // Update button states
+        function updateButtonStates(activeType) {
+            const buttons = document.querySelectorAll('.animation-controls button');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+                if (button.textContent.toLowerCase() === activeType) {
+                    button.classList.add('active');
+                }
+            });
+        }
+        
+        // Theme toggle function
+        function toggleTheme(theme) {
+            const body = document.body;
+            if (theme === 'dark') {
+                body.className = 'theme-dark';
+            } else {
+                body.className = 'theme-light';
+            }
+            
+            // Restart current animation to apply theme changes
+            if (currentAnimation) {
+                setTimeout(() => {
+                    testAnimation(currentAnimation);
+                }, 100);
+            }
+        }
+        
+        // Auto-demo function
+        function startDemo() {
+            const animations = ['rain', 'snow', 'storm', 'clouds', 'sun', 'stars'];
+            let index = 0;
+            
+            function nextAnimation() {
+                if (index < animations.length) {
+                    testAnimation(animations[index]);
+                    index++;
+                    setTimeout(nextAnimation, 5000); // Change every 5 seconds
+                } else {
+                    index = 0;
+                    setTimeout(nextAnimation, 2000);
+                }
+            }
+            
+            nextAnimation();
+        }
+        
+        // Start demo after 3 seconds
+        setTimeout(startDemo, 3000);
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (currentAnimation && weatherAnimations) {
+                setTimeout(() => {
+                    testAnimation(currentAnimation);
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html> 

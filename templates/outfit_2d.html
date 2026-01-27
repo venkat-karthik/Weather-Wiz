@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Outfit Suggestions - 2D</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .outfit-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .outfit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .outfit-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .city-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .city-selector select {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            min-width: 150px;
+        }
+        
+        .outfit-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .control-group label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .control-btn {
+            padding: 12px 24px;
+            border: 2px solid var(--primary-color);
+            border-radius: 25px;
+            background: transparent;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        .control-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .control-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        .weather-info {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .weather-info h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        
+        .weather-details {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .weather-detail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .weather-detail-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .weather-detail-value {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .outfit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .outfit-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 320px;
+        }
+        
+        .outfit-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .outfit-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        .outfit-item:hover::before {
+            opacity: 1;
+        }
+        
+        .outfit-icon {
+            font-size: 5rem;
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            margin-bottom: 0;
+        }
+        
+        .outfit-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding-top: 15px;
+        }
+        
+        .outfit-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: var(--text-color);
+            flex-shrink: 0;
+            line-height: 1.2;
+        }
+        
+        .outfit-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            flex-grow: 0;
+        }
+        
+        .outfit-colors {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-shrink: 0;
+        }
+        
+        .color-suggestion {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
+        }
+        
+        .color-suggestion:hover {
+            transform: scale(1.2);
+        }
+        
+        .outfit-reasoning {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .outfit-reasoning h3 {
+            color: var(--text-color);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .outfit-reasoning p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+        
+        .outfit-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .action-btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        .action-btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+        }
+        
+        .action-btn-secondary:hover {
+            background: var(--border-color);
+            transform: translateY(-2px);
+        }
+        
+        .preferences-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 123, 255, 0.3);
+            transition: all 0.3s ease;
+            font-size: 1.5rem;
+        }
+        
+        .preferences-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 123, 255, 0.4);
+        }
+        
+        .outfit-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .outfit-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .outfit-title {
+                font-size: 2rem;
+            }
+            
+            .outfit-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-group {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .outfit-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .outfit-item {
+                min-height: 280px;
+            }
+            
+            .outfit-icon {
+                font-size: 4.5rem;
+                height: 80px;
+            }
+            
+            .outfit-name {
+                font-size: 1.3rem;
+            }
+            
+            .outfit-description {
+                font-size: 0.9rem;
+            }
+            
+            .outfit-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .preferences-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .outfit-container {
+                padding: 15px;
+            }
+            
+            .outfit-title {
+                font-size: 1.8rem;
+            }
+            
+            .weather-info {
+                padding: 20px;
+            }
+            
+            .weather-info h2 {
+                font-size: 1.6rem;
+            }
+            
+            .outfit-item {
+                min-height: 260px;
+                padding: 20px;
+            }
+            
+            .outfit-icon {
+                font-size: 4rem;
+                height: 70px;
+            }
+            
+            .outfit-name {
+                font-size: 1.2rem;
+            }
+            
+            .outfit-description {
+                font-size: 0.85rem;
+            }
+            
+            .outfit-colors {
+                gap: 8px;
+            }
+            
+            .color-suggestion {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">Weather App</div>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('forecast') }}">Forecast</a></li>
+                <li><a href="{{ url_for('search') }}">Search</a></li>
+                <li><a href="{{ url_for('map') }}">Map</a></li>
+                <li><a href="{{ url_for('outfit_2d') }}" class="active">Outfits</a></li>
+            </ul>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        </nav>
+
+        <div class="outfit-container">
+            <div class="outfit-header">
+                <h1 class="outfit-title">Weather-Appropriate Outfit Suggestions</h1>
+                <div class="city-selector">
+                    <label for="city-select">Select City:</label>
+                    <select id="city-select" onchange="changeCity()">
+                        <option value="{{ current_city }}" selected>{{ current_city }}</option>
+                        {% for city in saved_cities %}
+                            {% if city != current_city %}
+                                <option value="{{ city }}">{{ city }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            {% if current_weather %}
+            <div class="weather-info">
+                <h2>{{ current_weather.location }}</h2>
+                <p>{{ current_weather.description }} | {{ current_weather.temperature }}°C</p>
+                <div class="weather-details">
+                    <div class="weather-detail">
+                        <span class="weather-detail-label">Feels Like</span>
+                        <span class="weather-detail-value">{{ current_weather.feels_like }}°C</span>
+                    </div>
+                    <div class="weather-detail">
+                        <span class="weather-detail-label">Humidity</span>
+                        <span class="weather-detail-value">{{ current_weather.humidity }}%</span>
+                    </div>
+                    <div class="weather-detail">
+                        <span class="weather-detail-label">Wind</span>
+                        <span class="weather-detail-value">{{ current_weather.wind_speed }} km/h</span>
+                    </div>
+                    <div class="weather-detail">
+                        <span class="weather-detail-label">Pressure</span>
+                        <span class="weather-detail-value">{{ current_weather.pressure }} hPa</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="outfit-controls">
+                <div class="control-group">
+                    <label>Style</label>
+                    <button class="control-btn active" onclick="setStyle('casual')">Casual</button>
+                </div>
+                <div class="control-group">
+                    <label>Style</label>
+                    <button class="control-btn" onclick="setStyle('formal')">Formal</button>
+                </div>
+                <div class="control-group">
+                    <label>Style</label>
+                    <button class="control-btn" onclick="setStyle('sporty')">Sporty</button>
+                </div>
+                <div class="control-group">
+                    <label>Style</label>
+                    <button class="control-btn" onclick="setStyle('trendy')">Trendy</button>
+                </div>
+            </div>
+            
+            <div class="outfit-stats" id="outfit-stats">
+                <!-- Stats will be populated by JavaScript -->
+            </div>
+            
+            <div class="outfit-grid" id="outfit-grid">
+                <!-- Outfit items will be populated by JavaScript -->
+            </div>
+            
+            <div class="outfit-actions">
+                <button class="action-btn action-btn-primary" onclick="saveOutfit()">
+                    💾 Save Outfit
+                </button>
+                <button class="action-btn action-btn-secondary" onclick="shareOutfit()">
+                    📤 Share
+                </button>
+                <button class="action-btn action-btn-secondary" onclick="showPreferences()">
+                    ⚙️ Preferences
+                </button>
+                <button class="action-btn action-btn-secondary" onclick="refreshOutfit()">
+                    🔄 Refresh
+                </button>
+            </div>
+            
+            <div class="outfit-reasoning" id="outfit-reasoning">
+                <!-- Reasoning will be populated by JavaScript -->
+            </div>
+            
+            {% else %}
+            <div class="weather-info">
+                <p>Unable to load weather data. Please try again.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Floating Preferences Button -->
+        <button class="preferences-btn" onclick="showPreferences()" title="Outfit Preferences">
+            ⚙️
+        </button>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/outfit-suggestions.js') }}"></script>
+    <script>
+        const weatherData = {{ current_weather|tojson if current_weather else 'null' }};
+        const savedCities = {{ saved_cities|tojson }};
+        let currentStyle = 'casual';
+        let currentOutfit = null;
+        
+        // Enhanced outfit database with more variety and weather conditions
+        const outfitDatabase = {
+            casual: {
+                hot: {
+                    top: { name: 'Cotton T-Shirt', icon: '👕', description: 'Light, breathable cotton', colors: ['#FFFFFF', '#000000', '#1E90FF', '#FF6B6B'] },
+                    bottom: { name: 'Shorts', icon: '🩳', description: 'Comfortable and cool', colors: ['#8B4513', '#000000', '#4169E1', '#32CD32'] },
+                    footwear: { name: 'Sandals', icon: '🩴', description: 'Open and airy', colors: ['#8B4513', '#000000', '#FFFFFF'] },
+                    accessories: [
+                        { name: 'Sunglasses', icon: '🕶️', description: 'Protect your eyes', colors: ['#000000', '#1E90FF'] },
+                        { name: 'Hat', icon: '🧢', description: 'Keep the sun off', colors: ['#FFFFFF', '#000000', '#FF6B6B'] }
+                    ]
+                },
+                warm: {
+                    top: { name: 'Polo Shirt', icon: '👕', description: 'Smart casual option', colors: ['#FFFFFF', '#000000', '#1E90FF', '#32CD32'] },
+                    bottom: { name: 'Jeans', icon: '👖', description: 'Classic and versatile', colors: ['#4169E1', '#000000', '#8B4513'] },
+                    footwear: { name: 'Sneakers', icon: '👟', description: 'Comfortable walking', colors: ['#FFFFFF', '#000000', '#FF6B6B'] },
+                    accessories: [
+                        { name: 'Sunglasses', icon: '🕶️', description: 'UV protection', colors: ['#000000', '#1E90FF'] }
+                    ]
+                },
+                mild: {
+                    top: { name: 'Sweater', icon: '🧥', description: 'Warm and cozy', colors: ['#8B4513', '#000000', '#FF6B6B', '#32CD32'] },
+                    bottom: { name: 'Jeans', icon: '👖', description: 'Durable and warm', colors: ['#4169E1', '#000000'] },
+                    footwear: { name: 'Sneakers', icon: '👟', description: 'Good for walking', colors: ['#FFFFFF', '#000000'] },
+                    accessories: []
+                },
+                cold: {
+                    top: { name: 'Jacket', icon: '🧥', description: 'Warm outer layer', colors: ['#8B4513', '#000000', '#4169E1'] },
+                    bottom: { name: 'Jeans', icon: '👖', description: 'Thick denim', colors: ['#4169E1', '#000000'] },
+                    footwear: { name: 'Boots', icon: '👢', description: 'Warm and waterproof', colors: ['#8B4513', '#000000'] },
+                    accessories: [
+                        { name: 'Scarf', icon: '🧣', description: 'Keep your neck warm', colors: ['#FF6B6B', '#1E90FF', '#32CD32'] },
+                        { name: 'Gloves', icon: '🧤', description: 'Protect your hands', colors: ['#000000', '#8B4513'] }
+                    ]
+                },
+                freezing: {
+                    top: { name: 'Heavy Jacket', icon: '🧥', description: 'Insulated for extreme cold', colors: ['#000000', '#4169E1', '#8B4513'] },
+                    bottom: { name: 'Thick Pants', icon: '👖', description: 'Thermal protection', colors: ['#000000', '#4169E1'] },
+                    footwear: { name: 'Winter Boots', icon: '👢', description: 'Insulated and waterproof', colors: ['#000000', '#8B4513'] },
+                    accessories: [
+                        { name: 'Scarf', icon: '🧣', description: 'Essential warmth', colors: ['#FF6B6B', '#1E90FF'] },
+                        { name: 'Gloves', icon: '🧤', description: 'Frost protection', colors: ['#000000', '#8B4513'] },
+                        { name: 'Hat', icon: '🎩', description: 'Keep your head warm', colors: ['#000000', '#8B4513'] }
+                    ]
+                }
+            },
+            formal: {
+                hot: {
+                    top: { name: 'Short-Sleeve Shirt', icon: '👔', description: 'Professional but cool', colors: ['#FFFFFF', '#1E90FF', '#000000'] },
+                    bottom: { name: 'Dress Pants', icon: '👖', description: 'Lightweight formal', colors: ['#000000', '#4169E1', '#8B4513'] },
+                    footwear: { name: 'Loafers', icon: '👞', description: 'Breathable formal', colors: ['#8B4513', '#000000'] },
+                    accessories: [
+                        { name: 'Sunglasses', icon: '🕶️', description: 'Professional protection', colors: ['#000000', '#1E90FF'] }
+                    ]
+                },
+                warm: {
+                    top: { name: 'Dress Shirt', icon: '👔', description: 'Classic professional', colors: ['#FFFFFF', '#1E90FF', '#000000'] },
+                    bottom: { name: 'Dress Pants', icon: '👖', description: 'Slim fit formal', colors: ['#000000', '#4169E1'] },
+                    footwear: { name: 'Dress Shoes', icon: '👞', description: 'Professional finish', colors: ['#000000', '#8B4513'] },
+                    accessories: []
+                },
+                mild: {
+                    top: { name: 'Suit Jacket', icon: '🧥', description: 'Professional layering', colors: ['#000000', '#4169E1', '#8B4513'] },
+                    bottom: { name: 'Suit Pants', icon: '👖', description: 'Matching formal', colors: ['#000000', '#4169E1'] },
+                    footwear: { name: 'Dress Shoes', icon: '👞', description: 'Complete the look', colors: ['#000000', '#8B4513'] },
+                    accessories: []
+                },
+                cold: {
+                    top: { name: 'Winter Coat', icon: '🧥', description: 'Professional warmth', colors: ['#000000', '#4169E1', '#8B4513'] },
+                    bottom: { name: 'Suit Pants', icon: '👖', description: 'Formal and warm', colors: ['#000000', '#4169E1'] },
+                    footwear: { name: 'Dress Boots', icon: '👢', description: 'Professional winter', colors: ['#000000', '#8B4513'] },
+                    accessories: [
+                        { name: 'Scarf', icon: '🧣', description: 'Elegant warmth', colors: ['#FF6B6B', '#1E90FF'] }
+                    ]
+                },
+                freezing: {
+                    top: { name: 'Heavy Winter Coat', icon: '🧥', description: 'Executive protection', colors: ['#000000', '#4169E1'] },
+                    bottom: { name: 'Winter Pants', icon: '👖', description: 'Formal thermal', colors: ['#000000', '#4169E1'] },
+                    footwear: { name: 'Dress Boots', icon: '👢', description: 'Professional winter', colors: ['#000000', '#8B4513'] },
+                    accessories: [
+                        { name: 'Scarf', icon: '🧣', description: 'Executive style', colors: ['#FF6B6B', '#1E90FF'] },
+                        { name: 'Gloves', icon: '🧤', description: 'Professional protection', colors: ['#000000', '#8B4513'] }
+                    ]
+                }
+            },
+            sporty: {
+                hot: {
+                    top: { name: 'Athletic Shirt', icon: '👕', description: 'Moisture-wicking', colors: ['#FFFFFF', '#000000', '#FF6B6B', '#32CD32'] },
+                    bottom: { name: 'Athletic Shorts', icon: '🩳', description: 'Light and flexible', colors: ['#000000', '#4169E1', '#32CD32'] },
+                    footwear: { name: 'Running Shoes', icon: '👟', description: 'Breathable support', colors: ['#FFFFFF', '#000000', '#FF6B6B'] },
+                    accessories: [
+                        { name: 'Sports Cap', icon: '🧢', description: 'Sweat management', colors: ['#000000', '#FF6B6B', '#32CD32'] },
+                        { name: 'Sunglasses', icon: '🕶️', description: 'Sports protection', colors: ['#000000', '#1E90FF'] }
+                    ]
+                },
+                warm: {
+                    top: { name: 'Sports Jersey', icon: '👕', description: 'Team spirit', colors: ['#FF6B6B', '#1E90FF', '#32CD32', '#FFD700'] },
+                    bottom: { name: 'Athletic Pants', icon: '👖', description: 'Flexible movement', colors: ['#000000', '#4169E1', '#32CD32'] },
+                    footwear: { name: 'Training Shoes', icon: '👟', description: 'Versatile support', colors: ['#FFFFFF', '#000000', '#FF6B6B'] },
+                    accessories: [
+                        { name: 'Sports Cap', icon: '🧢', description: 'Activity ready', colors: ['#000000', '#FF6B6B'] }
+                    ]
+                },
+                mild: {
+                    top: { name: 'Track Jacket', icon: '🧥', description: 'Light warmth', colors: ['#000000', '#4169E1', '#FF6B6B'] },
+                    bottom: { name: 'Athletic Pants', icon: '👖', description: 'Comfortable fit', colors: ['#000000', '#4169E1', '#32CD32'] },
+                    footwear: { name: 'Training Shoes', icon: '👟', description: 'All-purpose', colors: ['#FFFFFF', '#000000'] },
+                    accessories: []
+                },
+                cold: {
+                    top: { name: 'Sports Jacket', icon: '🧥', description: 'Active warmth', colors: ['#000000', '#4169E1', '#FF6B6B'] },
+                    bottom: { name: 'Thermal Pants', icon: '👖', description: 'Insulated movement', colors: ['#000000', '#4169E1'] },
+                    footwear: { name: 'Winter Sports Shoes', icon: '👟', description: 'Cold weather ready', colors: ['#000000', '#8B4513'] },
+                    accessories: [
+                        { name: 'Sports Gloves', icon: '🧤', description: 'Active protection', colors: ['#000000', '#FF6B6B'] }
+                    ]
+                },
+                freezing: {
+                    top: { name: 'Heavy Sports Jacket', icon: '🧥', description: 'Extreme protection', colors: ['#000000', '#4169E1'] },
+                    bottom: { name: 'Thermal Pants', icon: '👖', description: 'Maximum insulation', colors: ['#000000', '#4169E1'] },
+                    footwear: { name: 'Winter Sports Boots', icon: '👟', description: 'Extreme weather', colors: ['#000000', '#8B4513'] },
+                    accessories: [
+                        { name: 'Sports Gloves', icon: '🧤', description: 'Frost protection', colors: ['#000000', '#FF6B6B'] },
+                        { name: 'Sports Hat', icon: '🧢', description: 'Active warmth', colors: ['#000000', '#FF6B6B'] }
+                    ]
+                }
+            },
+            trendy: {
+                hot: {
+                    top: { name: 'Trendy Tank', icon: '👕', description: 'Fashion-forward', colors: ['#FF6B6B', '#1E90FF', '#32CD32', '#FFD700'] },
+                    bottom: { name: 'High-Waist Shorts', icon: '🩳', description: 'Stylish and cool', colors: ['#000000', '#4169E1', '#FF6B6B'] },
+                    footwear: { name: 'Platform Sandals', icon: '🩴', description: 'Trendy footwear', colors: ['#8B4513', '#000000', '#FF6B6B'] },
+                    accessories: [
+                        { name: 'Trendy Sunglasses', icon: '🕶️', description: 'Fashion statement', colors: ['#000000', '#1E90FF', '#FF6B6B'] },
+                        { name: 'Bucket Hat', icon: '🧢', description: 'Trendy protection', colors: ['#000000', '#FF6B6B', '#32CD32'] }
+                    ]
+                },
+                warm: {
+                    top: { name: 'Crop Top', icon: '👕', description: 'Trendy style', colors: ['#FFFFFF', '#FF6B6B', '#1E90FF', '#32CD32'] },
+                    bottom: { name: 'Mom Jeans', icon: '👖', description: 'Retro trendy', colors: ['#4169E1', '#000000', '#8B4513'] },
+                    footwear: { name: 'Chunky Sneakers', icon: '👟', description: 'Trendy comfort', colors: ['#FFFFFF', '#000000', '#FF6B6B'] },
+                    accessories: [
+                        { name: 'Chain Necklace', icon: '💎', description: 'Trendy accessory', colors: ['#FFD700', '#C0C0C0'] }
+                    ]
+                },
+                mild: {
+                    top: { name: 'Oversized Sweater', icon: '🧥', description: 'Trendy cozy', colors: ['#8B4513', '#FF6B6B', '#1E90FF', '#32CD32'] },
+                    bottom: { name: 'Wide-Leg Pants', icon: '👖', description: 'Trendy comfort', colors: ['#000000', '#4169E1', '#8B4513'] },
+                    footwear: { name: 'Ankle Boots', icon: '👢', description: 'Trendy style', colors: ['#000000', '#8B4513', '#FF6B6B'] },
+                    accessories: [
+                        { name: 'Scrunchie', icon: '🎀', description: 'Trendy hair accessory', colors: ['#FF6B6B', '#1E90FF', '#32CD32'] }
+                    ]
+                },
+                cold: {
+                    top: { name: 'Trendy Jacket', icon: '🧥', description: 'Fashionable warmth', colors: ['#000000', '#4169E1', '#FF6B6B'] },
+                    bottom: { name: 'Trendy Pants', icon: '👖', description: 'Stylish and warm', colors: ['#000000', '#4169E1', '#8B4513'] },
+                    footwear: { name: 'Trendy Boots', icon: '👢', description: 'Fashionable winter', colors: ['#000000', '#8B4513', '#FF6B6B'] },
+                    accessories: [
+                        { name: 'Trendy Scarf', icon: '🧣', description: 'Fashionable warmth', colors: ['#FF6B6B', '#1E90FF', '#32CD32'] },
+                        { name: 'Trendy Gloves', icon: '🧤', description: 'Stylish protection', colors: ['#000000', '#FF6B6B'] }
+                    ]
+                },
+                freezing: {
+                    top: { name: 'Trendy Winter Coat', icon: '🧥', description: 'Fashionable protection', colors: ['#000000', '#4169E1', '#FF6B6B'] },
+                    bottom: { name: 'Trendy Winter Pants', icon: '👖', description: 'Stylish thermal', colors: ['#000000', '#4169E1'] },
+                    footwear: { name: 'Trendy Winter Boots', icon: '👢', description: 'Fashionable extreme', colors: ['#000000', '#8B4513', '#FF6B6B'] },
+                    accessories: [
+                        { name: 'Trendy Scarf', icon: '🧣', description: 'Fashionable warmth', colors: ['#FF6B6B', '#1E90FF', '#32CD32'] },
+                        { name: 'Trendy Gloves', icon: '🧤', description: 'Stylish protection', colors: ['#000000', '#FF6B6B'] },
+                        { name: 'Trendy Hat', icon: '🎩', description: 'Fashionable warmth', colors: ['#000000', '#FF6B6B', '#8B4513'] }
+                    ]
+                }
+            }
+        };
+        
+        function getTemperatureCategory(temp) {
+            if (temp >= 30) return 'hot';
+            if (temp >= 20) return 'warm';
+            if (temp >= 10) return 'mild';
+            if (temp >= 0) return 'cold';
+            return 'freezing';
+        }
+        
+        function getWeatherCondition(description) {
+            const desc = description.toLowerCase();
+            if (desc.includes('rain') || desc.includes('drizzle')) return 'rainy';
+            if (desc.includes('snow') || desc.includes('sleet')) return 'snowy';
+            if (desc.includes('wind') || desc.includes('breeze')) return 'windy';
+            if (desc.includes('fog') || desc.includes('mist')) return 'foggy';
+            if (desc.includes('cloud') || desc.includes('overcast')) return 'cloudy';
+            if (desc.includes('clear') || desc.includes('sun')) return 'sunny';
+            return 'cloudy';
+        }
+        
+        function changeCity() {
+            const selectedCity = document.getElementById('city-select').value;
+            window.location.href = `/outfit-2d?city=${encodeURIComponent(selectedCity)}`;
+        }
+        
+        function setStyle(style) {
+            currentStyle = style;
+            
+            // Update button states
+            document.querySelectorAll('.control-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            generateOutfit();
+        }
+        
+        function generateOutfit() {
+            if (!weatherData) return;
+            
+            const temp = weatherData.temperature;
+            const tempCategory = getTemperatureCategory(temp);
+            const weatherCondition = getWeatherCondition(weatherData.description);
+            const outfit = outfitDatabase[currentStyle][tempCategory];
+            
+            currentOutfit = {
+                style: currentStyle,
+                temperature: temp,
+                condition: weatherCondition,
+                items: outfit
+            };
+            
+            const grid = document.getElementById('outfit-grid');
+            grid.innerHTML = '';
+            
+            // Add main items
+            const items = [
+                outfit.top,
+                outfit.bottom,
+                outfit.footwear,
+                ...outfit.accessories
+            ];
+            
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'outfit-item';
+                
+                const colorSuggestions = item.colors ? item.colors.map(color => 
+                    `<div class="color-suggestion" style="background-color: ${color};" title="${color}"></div>`
+                ).join('') : '';
+                
+                itemDiv.innerHTML = `
+                    <div class="outfit-icon">${item.icon}</div>
+                    <div class="outfit-content">
+                        <div class="outfit-name">${item.name}</div>
+                        <div class="outfit-description">${item.description}</div>
+                        ${colorSuggestions ? `<div class="outfit-colors">${colorSuggestions}</div>` : ''}
+                    </div>
+                `;
+                grid.appendChild(itemDiv);
+            });
+            
+            // Update stats
+            updateStats(temp, weatherCondition);
+            
+            // Update reasoning
+            updateReasoning(temp, tempCategory, currentStyle, weatherCondition);
+        }
+        
+        function updateStats(temp, condition) {
+            const statsContainer = document.getElementById('outfit-stats');
+            const comfortLevel = getComfortLevel(temp, condition);
+            const styleScore = getStyleScore(currentStyle);
+            const weatherScore = getWeatherScore(temp, condition);
+            
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${comfortLevel}%</div>
+                    <div class="stat-label">Comfort Level</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${styleScore}/10</div>
+                    <div class="stat-label">Style Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${weatherScore}/10</div>
+                    <div class="stat-label">Weather Match</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${outfitDatabase[currentStyle][getTemperatureCategory(temp)].accessories.length}</div>
+                    <div class="stat-label">Accessories</div>
+                </div>
+            `;
+        }
+        
+        function getComfortLevel(temp, condition) {
+            let base = 80;
+            if (temp < 0 || temp > 35) base -= 20;
+            if (condition === 'rainy' || condition === 'snowy') base -= 10;
+            if (condition === 'windy') base -= 5;
+            return Math.max(0, Math.min(100, base));
+        }
+        
+        function getStyleScore(style) {
+            const scores = { casual: 8, formal: 9, sporty: 7, trendy: 8 };
+            return scores[style] || 7;
+        }
+        
+        function getWeatherScore(temp, condition) {
+            let score = 8;
+            if (temp < -10 || temp > 40) score -= 3;
+            if (condition === 'snowy' && temp > 5) score -= 2;
+            if (condition === 'rainy' && temp < 10) score -= 1;
+            return Math.max(0, Math.min(10, score));
+        }
+        
+        function updateReasoning(temp, tempCategory, style, condition) {
+            const reasoning = document.getElementById('outfit-reasoning');
+            
+            let reasoningText = '';
+            let conditionAdvice = '';
+            
+            switch (tempCategory) {
+                case 'hot':
+                    reasoningText = `With temperatures at ${temp}°C, we've selected lightweight, breathable clothing. The ${style} style focuses on comfort and ventilation to help you stay cool throughout the day.`;
+                    break;
+                case 'warm':
+                    reasoningText = `At ${temp}°C, we've chosen comfortable ${style} clothing that provides good airflow while maintaining a polished appearance. Perfect for moderate outdoor activities.`;
+                    break;
+                case 'mild':
+                    reasoningText = `With ${temp}°C temperatures, we've selected ${style} clothing that provides adequate warmth without being too heavy. Layering options are included for temperature changes.`;
+                    break;
+                case 'cold':
+                    reasoningText = `At ${temp}°C, we've chosen ${style} clothing with proper insulation and wind protection. The outfit prioritizes warmth while maintaining your preferred style.`;
+                    break;
+                case 'freezing':
+                    reasoningText = `With freezing temperatures of ${temp}°C, we've selected heavy-duty ${style} clothing with maximum insulation. Protection from extreme cold is the priority.`;
+                    break;
+            }
+            
+            // Add weather condition specific advice
+            switch (condition) {
+                case 'rainy':
+                    conditionAdvice = ' Consider adding waterproof items and an umbrella for rain protection.';
+                    break;
+                case 'snowy':
+                    conditionAdvice = ' Ensure footwear has good traction and consider thermal layers for snow conditions.';
+                    break;
+                case 'windy':
+                    conditionAdvice = ' Wind-resistant outer layers are recommended to maintain comfort.';
+                    break;
+                case 'sunny':
+                    conditionAdvice = ' Don\'t forget sunscreen and UV protection accessories.';
+                    break;
+            }
+            
+            reasoning.innerHTML = `
+                <h3>Why This Outfit?</h3>
+                <p>${reasoningText}${conditionAdvice}</p>
+                <p><strong>Style:</strong> ${style.charAt(0).toUpperCase() + style.slice(1)} | <strong>Temperature:</strong> ${temp}°C | <strong>Condition:</strong> ${weatherData.description}</p>
+            `;
+        }
+        
+        function saveOutfit() {
+            if (!currentOutfit) {
+                alert('No outfit to save!');
+                return;
+            }
+            
+            const savedOutfits = JSON.parse(localStorage.getItem('savedOutfits') || '[]');
+            const outfitData = {
+                ...currentOutfit,
+                timestamp: new Date().toISOString(),
+                city: weatherData.location
+            };
+            
+            savedOutfits.push(outfitData);
+            localStorage.setItem('savedOutfits', JSON.stringify(savedOutfits));
+            
+            alert('Outfit saved successfully!');
+        }
+        
+        function shareOutfit() {
+            if (!currentOutfit) {
+                alert('No outfit to share!');
+                return;
+            }
+            
+            const shareText = `Check out my weather-appropriate outfit for ${weatherData.location} (${weatherData.temperature}°C): ${currentOutfit.style} style with ${currentOutfit.items.top.name}, ${currentOutfit.items.bottom.name}, and ${currentOutfit.items.footwear.name}!`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Weather Outfit Suggestion',
+                    text: shareText,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Outfit details copied to clipboard!');
+                });
+            }
+        }
+        
+        function showPreferences() {
+            // Navigate to preferences page
+            window.location.href = '/outfit-preferences';
+        }
+        
+        function refreshOutfit() {
+            generateOutfit();
+        }
+        
+        // Initialize on page load
+        if (weatherData) {
+            generateOutfit();
+        }
+    </script>
+</body>
+</html> 

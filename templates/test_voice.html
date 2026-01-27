@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Assistant Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .voice-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 10px;
+        }
+        .voice-button.listening {
+            background: #dc3545;
+            animation: pulse 1s infinite;
+        }
+        .voice-button.speaking {
+            background: #ffc107;
+            color: black;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Voice Assistant Test Page</h1>
+        
+        <div class="test-section">
+            <h2>Voice Controls</h2>
+            <button id="voice-btn" class="voice-button" onclick="startVoiceAssistant()">
+                🎤 Start Voice Assistant
+            </button>
+            <button class="test-button" onclick="stopVoiceAssistant()">Stop Listening</button>
+            <button class="test-button" onclick="clearLog()">Clear Log</button>
+        </div>
+
+        <div class="test-section">
+            <h2>Manual City Extraction Test</h2>
+            <input type="text" id="test-transcript" class="test-input" 
+                   placeholder="Enter a test transcript (e.g., 'what is the weather in tokyo')" 
+                   value="what is the weather in tokyo">
+            <button class="test-button" onclick="testManualExtraction()">Test City Extraction</button>
+            <button class="test-button" onclick="runAllTests()">Run All Test Cases</button>
+        </div>
+
+        <div class="test-section">
+            <h2>Quick Test Buttons</h2>
+            <button class="test-button" onclick="testExtraction('what is the weather in tokyo')">Tokyo</button>
+            <button class="test-button" onclick="testExtraction('weather in london')">London</button>
+            <button class="test-button" onclick="testExtraction('forecast for new york')">New York</button>
+            <button class="test-button" onclick="testExtraction('temperature in paris')">Paris</button>
+            <button class="test-button" onclick="testExtraction('weather in srikakulam')">Srikakulam</button>
+            <button class="test-button" onclick="testExtraction('forecast for guntur')">Guntur</button>
+            <button class="test-button" onclick="testExtraction('weather in hyderabad')">Hyderabad</button>
+            <button class="test-button" onclick="testExtraction('temperature in bangalore')">Bangalore</button>
+            <button class="test-button" onclick="testExtraction('weather in vizag')">Vizag</button>
+            <button class="test-button" onclick="testExtraction('forecast for vijayawada')">Vijayawada</button>
+            <button class="test-button" onclick="testExtraction('weather in krishna lanka')">Krishna Lanka</button>
+            <button class="test-button" onclick="testExtraction('temperature in goa')">Goa</button>
+            <button class="test-button" onclick="testExtraction('weather in delhi')">Delhi</button>
+            <button class="test-button" onclick="testExtraction('forecast for mumbai')">Mumbai</button>
+            <button class="test-button" onclick="testExtraction('weather in chennai')">Chennai</button>
+            <button class="test-button" onclick="testExtraction('temperature in kolkata')">Kolkata</button>
+        </div>
+
+        <div class="test-section">
+            <h2>Problematic Cases (Should be Fixed)</h2>
+            <button class="test-button" onclick="testExtraction('listening weather forecast of vijayawada')">Listening + Vijayawada</button>
+            <button class="test-button" onclick="testExtraction('listening')">Just Listening</button>
+            <button class="test-button" onclick="testExtraction('krishna lanka')">Krishna Lanka</button>
+            <button class="test-button" onclick="testExtraction('vizag')">Vizag</button>
+            <button class="test-button" onclick="testExtraction('is the weather in tokyo')">Is the weather in Tokyo</button>
+            <button class="test-button" onclick="testExtraction('ecast of srikakulam')">Ecast of Srikakulam</button>
+        </div>
+
+        <div class="test-section">
+            <h2>Status</h2>
+            <div id="status" class="status info">Ready to test</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Console Log</h2>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/voice-assistant.js"></script>
+    <script>
+        // Override console.log to capture output
+        const originalLog = console.log;
+        const logDiv = document.getElementById('log');
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        };
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function startVoiceAssistant() {
+            if (window.weatherVoiceAssistant) {
+                window.weatherVoiceAssistant.startListening();
+                updateStatus('Voice assistant started - listening...', 'success');
+            } else {
+                updateStatus('Voice assistant not initialized', 'error');
+            }
+        }
+
+        function stopVoiceAssistant() {
+            if (window.weatherVoiceAssistant) {
+                window.weatherVoiceAssistant.stopListening();
+                updateStatus('Voice assistant stopped', 'info');
+            }
+        }
+
+        function testManualExtraction() {
+            const transcript = document.getElementById('test-transcript').value;
+            if (transcript.trim()) {
+                testExtraction(transcript);
+            } else {
+                updateStatus('Please enter a test transcript', 'error');
+            }
+        }
+
+        function testExtraction(transcript) {
+            console.log(`\n--- Testing: "${transcript}" ---`);
+            const extractedCity = testCityExtraction(transcript);
+            
+            if (extractedCity) {
+                updateStatus(`Extracted city: "${extractedCity}" from "${transcript}"`, 'success');
+            } else {
+                updateStatus(`Failed to extract city from "${transcript}"`, 'error');
+            }
+        }
+
+        function runAllTests() {
+            console.log('\n=== Running all test cases ===');
+            runCityExtractionTests();
+            updateStatus('All test cases completed - check console log', 'info');
+        }
+
+        function clearLog() {
+            logDiv.innerHTML = '';
+            updateStatus('Log cleared', 'info');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('Page loaded - voice assistant should be ready', 'info');
+            
+            // Wait a moment for voice assistant to initialize
+            setTimeout(() => {
+                if (window.weatherVoiceAssistant) {
+                    updateStatus('Voice assistant initialized successfully', 'success');
+                } else {
+                    updateStatus('Voice assistant failed to initialize', 'error');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 
