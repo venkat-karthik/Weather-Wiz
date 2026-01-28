@@ -2,7 +2,7 @@
 name = "weather-wiz"
 version = "1.0.0"
 description = "Weather-based outfit recommendations with affiliate shopping"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "flask>=3.1.1",
     "requests>=2.32.4",

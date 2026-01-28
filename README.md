@@ -12,9 +12,18 @@ A beautiful, responsive weather application with outfit recommendations and affi
 - **Responsive Design** - Beautiful UI with dark/light themes
 - **City Management** - Save and manage favorite cities
 
-## 🚀 Quick Deploy to Vercel
+## 🚀 Quick Deploy to Vercel (Recommended)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/weather-wiz)
+
+**Note**: This Flask application is optimized for **Vercel deployment**. While it can run on other platforms, Vercel provides the best experience for Python Flask apps with serverless functions.
+
+### Why Vercel?
+- ✅ Native Python/Flask support
+- ✅ Automatic serverless scaling
+- ✅ Easy environment variable management
+- ✅ Built-in CDN and performance optimization
+- ✅ Simple deployment process
 
 ### Prerequisites
 - OpenWeatherMap API key (free at [openweathermap.org](https://openweathermap.org/api))
@@ -124,17 +133,21 @@ Update `affiliate_products.py` with your Amazon affiliate products:
 
 ## 🌐 Deployment
 
-### Vercel (Recommended)
+### Vercel (Recommended) ⭐
 1. Fork this repository
 2. Connect to Vercel
 3. Set environment variables
 4. Deploy automatically
 
+**Perfect for**: Flask apps, serverless functions, automatic scaling
+
 ### Other Platforms
-- **Heroku**: Use `requirements.txt` and `runtime.txt`
-- **Railway**: Direct deployment support
-- **PythonAnywhere**: Upload and configure
-- **DigitalOcean**: Use App Platform
+- **Railway**: Good Python support, easy deployment
+- **Render**: Flask-friendly with free tier
+- **PythonAnywhere**: Traditional hosting, good for beginners
+- **Heroku**: Classic platform (paid plans only)
+
+**Note**: Netlify is primarily for static sites and may require additional configuration for Flask apps.
 
 ## 📱 Responsive Design
 
