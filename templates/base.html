@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Weather App{% endblock %}</title>
+    <title>{% block title %}Weather Wiz{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,7 +26,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-transparent">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
-                <i data-feather="cloud"></i> Weather
+                <i data-feather="cloud"></i> Weather Wiz
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -41,7 +41,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'forecast' %}active{% endif %}" href="{{ url_for('forecast', city=current_city if current_city else 'London') }}">
+                        <a class="nav-link {% if request.endpoint == 'forecast' %}active{% endif %}" href="{{ url_for('forecast') }}">
                             <i data-feather="calendar"></i> Forecast
                         </a>
                     </li>
@@ -56,7 +56,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'outfit_affiliate' %}active{% endif %}" href="{{ url_for('outfit_affiliate', city=current_city if current_city else 'London') }}">
+                        <a class="nav-link {% if request.endpoint == 'outfit_affiliate' %}active{% endif %}" href="{{ url_for('outfit_affiliate') }}">
                             <i data-feather="shopping-bag"></i> Outfit Store
                         </a>
                     </li>
@@ -73,36 +73,6 @@
                         <li><a class="dropdown-item" href="{{ url_for('city_weather', city=city) }}">{{ city }}</a></li>
                         {% endfor %}
                     </ul>
-                </div>
-                {% endif %}
-                
-                <!-- User Menu -->
-                {% if current_user.is_authenticated %}
-                <div class="dropdown me-3">
-                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
-                        <i data-feather="user"></i> {{ current_user.first_name or current_user.username }}
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">
-                            <i data-feather="user"></i> Profile
-                        </a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('outfit_preferences') }}">
-                            <i data-feather="settings"></i> Preferences
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                            <i data-feather="log-out"></i> Logout
-                        </a></li>
-                    </ul>
-                </div>
-                {% else %}
-                <div class="me-3">
-                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light me-2">
-                        <i data-feather="log-in"></i> Login
-                    </a>
-                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary">
-                        <i data-feather="user-plus"></i> Sign Up
-                    </a>
                 </div>
                 {% endif %}
                 
@@ -238,7 +208,7 @@
     <!-- Footer -->
     <footer class="mt-5 py-4 text-center text-white-50">
         <div class="container">
-            <p>&copy; 2024 Weather App. Powered by OpenWeatherMap API.</p>
+            <p>&copy; 2024 Weather Wiz. Powered by OpenWeatherMap API.</p>
         </div>
     </footer>
 
