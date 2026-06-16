@@ -148,8 +148,7 @@ class OutfitSuggestions {
         return 'cloudy'; // default
     }
 
-    // Generate outfit suggestion with affiliate products
-    async generateSuggestion(weatherData, style = 'casual') {
+    async generateSuggestion(weatherData, style = null) {
         const temp = weatherData.temperature;
         const condition = weatherData.description;
         const humidity = weatherData.humidity;
@@ -158,8 +157,11 @@ class OutfitSuggestions {
         const tempCategory = this.getTemperatureCategory(temp);
         const weatherCategory = this.getWeatherCondition(condition);
         
+        // Respect style parameter, fallback to user preferences or 'casual'
+        const activeStyle = style || this.userPreferences.style || 'casual';
+        
         // Fetch products from server
-        const products = await this.fetchProducts(style, tempCategory);
+        const products = await this.fetchProducts(activeStyle, tempCategory);
         
         // Select products based on preferences
         const suggestion = {
@@ -290,8 +292,15 @@ class OutfitSuggestions {
         return this.userPreferences;
     }
 
-    // Format suggestion for display
     formatSuggestion(suggestion) {
+        const topName = suggestion.outfit.top ? `${suggestion.outfit.top.name} by ${suggestion.outfit.top.brand} (${suggestion.outfit.top.price})` : "None";
+        const bottomName = suggestion.outfit.bottom ? `${suggestion.outfit.bottom.name} by ${suggestion.outfit.bottom.brand} (${suggestion.outfit.bottom.price})` : "None";
+        const footwearName = suggestion.outfit.footwear ? `${suggestion.outfit.footwear.name} by ${suggestion.outfit.footwear.brand} (${suggestion.outfit.footwear.price})` : "None";
+        
+        const accessoryNames = (suggestion.outfit.accessories && suggestion.outfit.accessories.length > 0)
+            ? suggestion.outfit.accessories.map(acc => `${acc.name} (${acc.price})`).join(', ')
+            : "None";
+
         return {
             summary: `Complete outfit for ${suggestion.temperature}°C, ${suggestion.condition}`,
             totalPrice: `$${suggestion.totalPrice}`,
@@ -300,6 +309,13 @@ class OutfitSuggestions {
                 bottom: suggestion.outfit.bottom,
                 footwear: suggestion.outfit.footwear,
                 accessories: suggestion.outfit.accessories
+            },
+            details: {
+                top: topName,
+                bottom: bottomName,
+                footwear: footwearName,
+                accessories: accessoryNames,
+                layers: suggestion.category === 'freezing' || suggestion.category === 'cold' ? 'Heavy Layers (Thermal + Fleece + Outerwear)' : (suggestion.category === 'cool' || suggestion.category === 'mild' ? 'Light Layers (Sweater/Jacket)' : 'No layering needed')
             },
             reasoning: suggestion.reasoning,
             tips: suggestion.tips
@@ -311,10 +327,15 @@ class OutfitSuggestions {
 const outfitSuggestions = new OutfitSuggestions();
 
 // Global function to get outfit suggestion
-function getOutfitSuggestion(weatherData) {
+async function getOutfitSuggestion(weatherData) {
     if (outfitSuggestions) {
-        const suggestion = outfitSuggestions.generateSuggestion(weatherData);
-        return outfitSuggestions.formatSuggestion(suggestion);
+        try {
+            const suggestion = await outfitSuggestions.generateSuggestion(weatherData);
+            return outfitSuggestions.formatSuggestion(suggestion);
+        } catch (error) {
+            console.error("Error in getOutfitSuggestion:", error);
+            return null;
+        }
     }
     return null;
 }

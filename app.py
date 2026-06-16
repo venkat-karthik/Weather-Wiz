@@ -226,54 +226,21 @@ def api_weather(city):
 def api_affiliate_products():
     """API endpoint for getting affiliate product recommendations"""
     try:
-        data = request.get_json()
+        data = request.get_json() or {}
         style = data.get('style', 'casual')
         temperature_category = data.get('temperature_category', 'warm')
         
-        # Return sample products for Vercel demo
-        products = {
-            'tops': [{
-                'name': 'Comfortable T-Shirt',
-                'brand': 'Generic',
-                'price': '$15.99',
-                'affiliateUrl': '#',
-                'image': 'https://via.placeholder.com/300x300?text=T-Shirt',
-                'rating': 4.0,
-                'description': 'Comfortable basic t-shirt',
-                'features': ['Cotton', 'Machine Washable', 'Comfortable Fit']
-            }],
-            'bottoms': [{
-                'name': 'Casual Pants',
-                'brand': 'Generic',
-                'price': '$29.99',
-                'affiliateUrl': '#',
-                'image': 'https://via.placeholder.com/300x300?text=Pants',
-                'rating': 4.0,
-                'description': 'Comfortable casual pants',
-                'features': ['Cotton Blend', 'Machine Washable', 'Regular Fit']
-            }],
-            'footwear': [{
-                'name': 'Comfortable Sneakers',
-                'brand': 'Generic',
-                'price': '$49.99',
-                'affiliateUrl': '#',
-                'image': 'https://via.placeholder.com/300x300?text=Sneakers',
-                'rating': 4.0,
-                'description': 'Comfortable sneakers',
-                'features': ['Canvas Upper', 'Rubber Sole', 'Comfortable']
-            }],
-            'accessories': [{
-                'name': 'Stylish Accessory',
-                'brand': 'Generic',
-                'price': '$19.99',
-                'affiliateUrl': '#',
-                'image': 'https://via.placeholder.com/300x300?text=Accessory',
-                'rating': 4.0,
-                'description': 'Stylish accessory',
-                'features': ['Durable', 'Stylish', 'Versatile']
-            }]
-        }
-        
+        try:
+            import affiliate_products
+            products = affiliate_products.get_products_by_weather(style, temperature_category)
+        except Exception as err:
+            logging.error(f"Failed to load affiliate products module: {str(err)}")
+            products = {}
+            
+        # Default structure fallback
+        if not products:
+            products = {'tops': [], 'bottoms': [], 'footwear': [], 'accessories': []}
+            
         return jsonify(products)
         
     except Exception as e:

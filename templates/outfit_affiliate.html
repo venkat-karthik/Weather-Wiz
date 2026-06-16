@@ -569,7 +569,7 @@
         generateOutfit();
     }
     
-    function generateOutfit() {
+    async function generateOutfit() {
         if (!weatherData) return;
         
         // Show loading state
@@ -577,9 +577,9 @@
         document.getElementById('outfit-grid').style.display = 'none';
         document.getElementById('outfit-summary').style.display = 'none';
         
-        // Simulate API call delay
-        setTimeout(() => {
-            const suggestion = outfitSuggestions.generateSuggestion(weatherData);
+        try {
+            // Await the async outfit suggestions generation
+            const suggestion = await outfitSuggestions.generateSuggestion(weatherData, currentStyle);
             const formatted = outfitSuggestions.formatSuggestion(suggestion);
             
             currentOutfit = formatted;
@@ -589,7 +589,10 @@
             document.getElementById('loading-state').style.display = 'none';
             document.getElementById('outfit-grid').style.display = 'grid';
             document.getElementById('outfit-summary').style.display = 'block';
-        }, 1000);
+        } catch (error) {
+            console.error("Error generating outfit suggestion:", error);
+            document.getElementById('loading-state').innerHTML = '<p class="text-danger">Error generating outfit recommendations. Please try again.</p>';
+        }
     }
     
     function displayOutfit(outfit) {
@@ -631,15 +634,15 @@
                 <p class="product-description">${product.description}</p>
                 <div class="product-features">${features}</div>
                 <div class="product-rating">
-                    <div class="stars">${stars}</div>
-                    <span class="rating-text">${product.rating}/5</span>
+                     <div class="stars">${stars}</div>
+                     <span class="rating-text">${product.rating}/5</span>
                 </div>
                 <div class="product-footer">
-                    <div class="product-price">${product.price}</div>
-                    <a href="${product.affiliateUrl || '#'}" class="buy-btn" target="_blank" rel="noopener">
-                        <i data-feather="shopping-cart"></i>
-                        Buy Now
-                    </a>
+                     <div class="product-price">${product.price}</div>
+                     <a href="${product.affiliateUrl || '#'}" class="buy-btn" target="_blank" rel="noopener">
+                         <i data-feather="shopping-cart"></i>
+                         Buy Now
+                     </a>
                 </div>
             </div>
         `;
@@ -674,7 +677,7 @@
         summary.innerHTML = `
             <div class="summary-header">
                 <h3 class="summary-title">Complete Outfit</h3>
-                <div class="total-price">$${outfit.totalPrice}</div>
+                <div class="total-price">${outfit.totalPrice}</div>
             </div>
             <div class="outfit-reasoning">${outfit.reasoning}</div>
             <div class="outfit-tips">

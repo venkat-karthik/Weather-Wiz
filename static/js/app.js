@@ -386,8 +386,17 @@ class WeatherApp {
     }
 }
 
+// Global showNotification utility mapping to active app instance
+function showNotification(message, type = 'info') {
+    if (window.weatherApp && typeof window.weatherApp.showNotification === 'function') {
+        window.weatherApp.showNotification(message, type);
+    } else {
+        console.log(`[Notification - ${type}] ${message}`);
+    }
+}
+
 // Outfit Suggestions Functions
-function showOutfitSuggestions() {
+async function showOutfitSuggestions() {
     // Get current weather data
     const weatherData = getCurrentWeatherData();
     
@@ -396,16 +405,23 @@ function showOutfitSuggestions() {
         return;
     }
     
-    // Generate outfit suggestion
-    const suggestion = getOutfitSuggestion(weatherData);
+    showNotification('Curating your perfect outfit...', 'info');
     
-    if (!suggestion) {
-        showNotification('Unable to generate outfit suggestion', 'error');
-        return;
+    try {
+        // Generate outfit suggestion
+        const suggestion = await getOutfitSuggestion(weatherData);
+        
+        if (!suggestion) {
+            showNotification('Unable to generate outfit suggestion', 'error');
+            return;
+        }
+        
+        // Create and show outfit suggestion modal
+        showOutfitSuggestionModal(suggestion);
+    } catch (error) {
+        console.error("Error generating outfit suggestion:", error);
+        showNotification('Error generating outfit suggestion', 'error');
     }
-    
-    // Create and show outfit suggestion modal
-    showOutfitSuggestionModal(suggestion);
 }
 
 function getCurrentWeatherData() {
