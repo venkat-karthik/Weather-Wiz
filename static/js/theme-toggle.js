@@ -8,7 +8,8 @@ function toggleTheme() {
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
         
         // Apply theme directly
-        document.body.className = document.body.className.replace(/theme-\w+/, `theme-${newTheme}`);
+        document.body.classList.remove('theme-light', 'theme-dark');
+        document.body.classList.add(`theme-${newTheme}`);
         localStorage.setItem('weather-app-theme', newTheme);
         
         // Update button text
@@ -61,7 +62,8 @@ class ThemeManager {
 
     applyTheme(theme) {
         this.currentTheme = theme;
-        document.body.className = document.body.className.replace(/theme-\w+/, `theme-${theme}`);
+        document.body.classList.remove('theme-light', 'theme-dark');
+        document.body.classList.add(`theme-${theme}`);
         
         // Update theme color meta tag for mobile browsers
         const themeColorMeta = document.querySelector('meta[name="theme-color"]');
